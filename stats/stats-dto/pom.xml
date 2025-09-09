@@ -13,6 +13,11 @@
     <artifactId>stats-dto</artifactId>
     <name>stats-dto</name>
 
+    <properties>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <jakarta.validation.version>3.0.2</jakarta.validation.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -26,6 +31,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- Валидация -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>${jakarta.validation.version}</version>
         </dependency>
     </dependencies>
 </project>
