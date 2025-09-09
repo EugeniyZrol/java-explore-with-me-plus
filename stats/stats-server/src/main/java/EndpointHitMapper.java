@@ -4,8 +4,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface EndpointHitMapper {
 
-    @Mapping(target = "id", ignore = true) // Игнорируем id при преобразовании DTO -> Entity
-    EndpointHitEntity toEntity(EndpointHit endpointHit);
+    @Mapping(target = "id", ignore = true)
+    EndpointHitEntity toEntity(EndpointHitDto endpointHitDto);
 
-    EndpointHit toDto(EndpointHitEntity entity);
+    EndpointHitDto toDto(EndpointHitEntity entity);
 }

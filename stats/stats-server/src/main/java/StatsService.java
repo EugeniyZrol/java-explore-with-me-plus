@@ -11,13 +11,13 @@ public class StatsService {
     private final StatsRepository statsRepository;
     private final EndpointHitMapper endpointHitMapper;
 
-    public EndpointHit saveHit(EndpointHit endpointHit) {
-        EndpointHitEntity entity = endpointHitMapper.toEntity(endpointHit);
+    public EndpointHitDto saveHit(EndpointHitDto endpointHitDto) {
+        EndpointHitEntity entity = endpointHitMapper.toEntity(endpointHitDto);
         EndpointHitEntity savedEntity = statsRepository.save(entity);
         return endpointHitMapper.toDto(savedEntity);
     }
 
-    public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         if (Boolean.TRUE.equals(unique)) {
             return statsRepository.findUniqueStats(start, end, uris);
         } else {

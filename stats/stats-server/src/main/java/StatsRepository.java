@@ -15,7 +15,7 @@ public interface StatsRepository extends JpaRepository<EndpointHitEntity, Long> 
             "AND (:uris IS NULL OR h.uri IN :uris) " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(h.ip) DESC")
-    List<ViewStats> findStats(@Param("start") LocalDateTime start,
+    List<ViewStatsDto> findStats(@Param("start") LocalDateTime start,
                               @Param("end") LocalDateTime end,
                               @Param("uris") List<String> uris);
 
@@ -25,7 +25,7 @@ public interface StatsRepository extends JpaRepository<EndpointHitEntity, Long> 
             "AND (:uris IS NULL OR h.uri IN :uris) " +
             "GROUP BY h.app, h.uri " +
             "ORDER BY COUNT(DISTINCT h.ip) DESC")
-    List<ViewStats> findUniqueStats(@Param("start") LocalDateTime start,
+    List<ViewStatsDto> findUniqueStats(@Param("start") LocalDateTime start,
                                     @Param("end") LocalDateTime end,
                                     @Param("uris") List<String> uris);
 }
