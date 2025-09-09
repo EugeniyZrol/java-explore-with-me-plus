@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EndpointHit {
+public class EndpointHitDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
