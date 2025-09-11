@@ -1,3 +1,5 @@
+package server;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

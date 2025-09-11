@@ -1,5 +1,9 @@
+package server;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.EndpointHitDto;
+import model.ViewStatsDto;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -19,9 +23,9 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public EndpointHitDto saveHit(@Valid @RequestBody EndpointHitDto endpointHitDto) {
+    public void saveHit(@Valid @RequestBody EndpointHitDto endpointHitDto) {
         log.info("Получен hit: {}", endpointHitDto);
-        return statsService.saveHit(endpointHitDto);
+        statsService.saveHit(endpointHitDto);
     }
 
     @GetMapping("/stats")

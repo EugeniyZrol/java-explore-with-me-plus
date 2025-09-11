@@ -1,4 +1,8 @@
+package server;
+
 import lombok.RequiredArgsConstructor;
+import model.EndpointHitDto;
+import model.ViewStatsDto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -1,5 +1,6 @@
+package model;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,9 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EndpointHitDto {
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
 
     @NotBlank(message = "App cannot be blank")
     private String app;
