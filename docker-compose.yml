@@ -14,16 +14,59 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ewm-network
+
+  main-db:
+    image: postgres:13-alpine
+    container_name: ewm_main_db
+    environment:
+      POSTGRES_DB: main
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "6542:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d main" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ewm-network
 
   stats-server:
-    build: ./stats-server
+    build: ./stats/stats-server
     container_name: ewm_stats_service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 9090
     ports:
       - "9090:9090"
     depends_on:
       stats-db:
         condition: service_healthy
+    networks:
+      - ewm-network
+
+  main-service:
+    build: ./main-service
+    container_name: ewm_main_service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://main-db:5432/main
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      STATS_SERVER_URL: http://stats-server:9090
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - main-db
+      - stats-server
+    networks:
+      - ewm-network
+
+networks:
+  ewm-network:
+    driver: bridge
