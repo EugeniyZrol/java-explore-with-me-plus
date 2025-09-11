@@ -1,5 +1,11 @@
+package ru.practicum.test;
+
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import ru.practicum.EndpointHitDto;
+import ru.practicum.EndpointHitEntity;
+import ru.practicum.EndpointHitMapper;
+
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 

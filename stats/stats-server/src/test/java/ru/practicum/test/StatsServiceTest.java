@@ -1,8 +1,11 @@
+package ru.practicum.test;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,10 +68,9 @@ class StatsServiceTest {
         List<String> uris = Arrays.asList("/test1", "/test2");
         Boolean unique = false;
 
-        List<ViewStatsDto> expectedStats = List.of(
-                new ViewStatsDto("app1", "/test1", 10L),
-                new ViewStatsDto("app1", "/test2", 5L)
-        );
+        ViewStatsDto stat1 = new ViewStatsDto("app1", "/test1", 10L);
+        ViewStatsDto stat2 = new ViewStatsDto("app1", "/test2", 5L);
+        List<ViewStatsDto> expectedStats = Arrays.asList(stat1, stat2);
 
         when(statsRepository.findStats(start, end, uris)).thenReturn(expectedStats);
 
@@ -86,10 +88,9 @@ class StatsServiceTest {
         List<String> uris = Arrays.asList("/test1", "/test2");
         Boolean unique = true;
 
-        List<ViewStatsDto> expectedStats = List.of(
-                new ViewStatsDto("app1", "/test1", 8L),
-                new ViewStatsDto("app1", "/test2", 3L)
-        );
+        ViewStatsDto stat1 = new ViewStatsDto("app1", "/test1", 8L);
+        ViewStatsDto stat2 = new ViewStatsDto("app1", "/test2", 3L);
+        List<ViewStatsDto> expectedStats = Arrays.asList(stat1, stat2);
 
         when(statsRepository.findUniqueStats(start, end, uris)).thenReturn(expectedStats);
 

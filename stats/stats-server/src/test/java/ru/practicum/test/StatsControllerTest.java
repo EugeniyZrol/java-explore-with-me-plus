@@ -1,8 +1,14 @@
+package ru.practicum.test;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.EndpointHitDto;
+import ru.practicum.StatsController;
+import ru.practicum.StatsService;
+import ru.practicum.ViewStatsDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,10 +58,9 @@ class StatsControllerTest {
         List<String> uris = Arrays.asList("/test1", "/test2");
         Boolean unique = false;
 
-        List<ViewStatsDto> expectedStats = List.of(
-                new ViewStatsDto("app1", "/test1", 10L),
-                new ViewStatsDto("app1", "/test2", 5L)
-        );
+        ViewStatsDto stat1 = new ViewStatsDto("app1", "/test1", 10L);
+        ViewStatsDto stat2 = new ViewStatsDto("app1", "/test2", 5L);
+        List<ViewStatsDto> expectedStats = Arrays.asList(stat1, stat2);
 
         when(statsService.getStats(start, end, uris, unique)).thenReturn(expectedStats);
 

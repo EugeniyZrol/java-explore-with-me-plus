@@ -1,3 +1,5 @@
+package ru.practicum;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

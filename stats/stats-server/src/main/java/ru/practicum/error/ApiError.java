@@ -1,4 +1,4 @@
-package error;
+package ru.practicum.error;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
