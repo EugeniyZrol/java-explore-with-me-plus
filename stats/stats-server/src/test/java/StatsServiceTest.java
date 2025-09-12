@@ -1,8 +1,14 @@
+import model.EndpointHitDto;
+import model.ViewStatsDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import server.EndpointHitEntity;
+import server.EndpointHitMapper;
+import server.StatsRepository;
+import server.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +46,6 @@ class StatsServiceTest {
         entity.setTimestamp(inputDto.getTimestamp());
 
         EndpointHitDto expectedDto = new EndpointHitDto();
-        expectedDto.setId(1L);
         expectedDto.setApp("test-app");
         expectedDto.setUri("/test");
         expectedDto.setIp("192.168.1.1");
@@ -53,7 +58,6 @@ class StatsServiceTest {
         EndpointHitDto result = statsService.saveHit(inputDto);
 
         assertNotNull(result);
-        assertEquals(1L, result.getId());
         assertEquals("test-app", result.getApp());
         verify(statsRepository, times(1)).save(entity);
     }

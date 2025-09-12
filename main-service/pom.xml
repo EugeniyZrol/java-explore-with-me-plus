@@ -22,11 +22,6 @@
             <artifactId>stats-client</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>ru.practicum</groupId>
-            <artifactId>stats-dto</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
 
         <!-- Spring Boot зависимости -->
         <dependency>
@@ -60,6 +55,19 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.practicum</groupId>
+            <artifactId>stats-dto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 

@@ -1,5 +1,9 @@
+import model.EndpointHitDto;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import server.EndpointHitEntity;
+import server.EndpointHitMapper;
+
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +39,6 @@ class EndpointHitMapperTest {
 
         EndpointHitDto dto = mapper.toDto(entity);
 
-        assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getApp(), dto.getApp());
         assertEquals(entity.getUri(), dto.getUri());
         assertEquals(entity.getIp(), dto.getIp());

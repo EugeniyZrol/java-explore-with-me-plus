@@ -1,3 +1,6 @@
+package server;
+
+import model.EndpointHitDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
