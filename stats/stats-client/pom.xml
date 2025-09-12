@@ -11,6 +11,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>stats-client</artifactId>
+    <name>stats-client</name>
+    <description>Stats Client module</description>
 
     <dependencies>
         <dependency>
