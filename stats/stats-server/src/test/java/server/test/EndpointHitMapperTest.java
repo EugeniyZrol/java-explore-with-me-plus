@@ -1,8 +1,10 @@
+package server.test;
+
 import model.EndpointHitDto;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import server.EndpointHitEntity;
-import server.EndpointHitMapper;
+import server.entity.EndpointHitEntity;
+import server.mapper.EndpointHitMapper;
 
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;

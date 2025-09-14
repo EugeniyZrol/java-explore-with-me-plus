@@ -1,9 +1,12 @@
-package server;
+package server.service;
 
 import lombok.RequiredArgsConstructor;
 import model.EndpointHitDto;
 import model.ViewStatsDto;
 import org.springframework.stereotype.Service;
+import server.repository.StatsRepository;
+import server.entity.EndpointHitEntity;
+import server.mapper.EndpointHitMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -2,6 +2,7 @@ package client;
 
 import model.EndpointHitDto;
 import model.ViewStatsDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -16,9 +17,10 @@ import java.util.Optional;
 public class StatsClient {
     final RestClient restClient;
 
-    public StatsClient(RestClient.Builder restClientBuilder) {
+    public StatsClient(RestClient.Builder restClientBuilder,
+                       @Value("${stats.server.url:http://localhost:9090}") String serverUrl) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:9090")
+                .baseUrl(serverUrl)
                 .build();
     }
 

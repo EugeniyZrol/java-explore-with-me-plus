@@ -1,8 +1,9 @@
-package server;
+package server.mapper;
 
 import model.EndpointHitDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import server.entity.EndpointHitEntity;
 
 @Mapper(componentModel = "spring")
 public interface EndpointHitMapper {

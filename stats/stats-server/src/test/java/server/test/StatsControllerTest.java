@@ -1,3 +1,5 @@
+package server.test;
+
 import model.EndpointHitDto;
 import model.ViewStatsDto;
 import org.junit.jupiter.api.Test;
@@ -5,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import server.StatsController;
-import server.StatsService;
+import server.controller.StatsController;
+import server.service.StatsService;
 
 import java.time.LocalDateTime;
 import java.util.List;

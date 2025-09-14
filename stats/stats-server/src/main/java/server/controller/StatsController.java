@@ -1,4 +1,4 @@
-package server;
+package server.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +10,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import server.service.StatsService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
