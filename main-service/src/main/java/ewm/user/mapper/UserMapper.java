@@ -9,5 +9,6 @@ import ewm.user.model.User;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
     User toEntity(NewUserRequest dto);
+
     UserResponse toDto(User user);
 }
