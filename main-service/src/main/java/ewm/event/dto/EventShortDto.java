@@ -1,6 +1,6 @@
 package ewm.event.dto;
 
-import ewm.category.model.Category;
+import ewm.categories.model.Category;
 import ewm.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
