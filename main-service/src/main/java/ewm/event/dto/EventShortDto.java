@@ -1,7 +1,7 @@
 package ewm.event.dto;
 
-import ewm.category.model.Category;
-import ewm.user.model.User;
+import ewm.categories.dto.CategoryDto;
+import ewm.user.dto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,8 +17,8 @@ public class EventShortDto {
     private Long id;
     private String title;
     private String annotation;
-    private Category category;
-    private User initiator;
+    private CategoryDto category;
+    private UserResponse initiator;
     private LocalDateTime eventDate;
     private Boolean paid;
     private Integer confirmedRequests;
