@@ -1,6 +1,6 @@
 package ewm.event.dto;
 
-import ewm.category.dto.CategoryDto;
+import ewm.categories.model.Category;
 import ewm.user.dto.UserShortDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,14 +14,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventShortDto {
+    private Long id;
+    private String title;
     private String annotation;
-    private CategoryDto category;
     private Long confirmedRequests;
     private LocalDateTime eventDate;
-    private Long id;
     private UserShortDto initiator;
     private Boolean paid;
-    private String title;
     private Integer participantLimit;
     private Long views;
 }
