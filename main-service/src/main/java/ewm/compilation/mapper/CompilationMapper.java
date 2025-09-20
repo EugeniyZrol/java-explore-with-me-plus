@@ -18,12 +18,14 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring", uses = EventMapper.class)
 public interface CompilationMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "events", ignore = true)
     Compilation toEntity(NewCompilationRequest request);
 
     @Mapping(target = "events", source = "events", qualifiedByName = "eventsToShortDtos")
     CompilationResponse toDto(Compilation compilation);
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "events", ignore = true)
     void updateEntityFromDto(UpdateCompilationRequest dto, @MappingTarget Compilation compilation);
 

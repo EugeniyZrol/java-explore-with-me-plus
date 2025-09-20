@@ -1,4 +1,4 @@
-package ewm.controller;
+package ewm.compilation.controller;
 
 import ewm.compilation.dto.CompilationResponse;
 import ewm.compilation.service.CompilationService;
@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping
+@RequestMapping("/public/compilations")
 @RequiredArgsConstructor
-public class PublicController {
+public class PublicCompilationController {
+
     private final CompilationService compilationService;
 
-    @GetMapping("/compilations")
+    @GetMapping
     public List<CompilationResponse> getCompilations(
             @RequestParam(required = false) Boolean pinned,
             @RequestParam(defaultValue = "0") int from,
@@ -24,7 +25,7 @@ public class PublicController {
         return compilationService.getCompilations(pinned, pageable);
     }
 
-    @GetMapping("/compilation/{compId}")
+    @GetMapping("/{compId}")
     public CompilationResponse getCompilation(@PathVariable Long compId) {
         return compilationService.getCompilationById(compId);
     }
