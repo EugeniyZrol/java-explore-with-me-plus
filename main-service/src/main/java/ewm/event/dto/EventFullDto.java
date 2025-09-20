@@ -13,15 +13,21 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventShortDto {
+public class EventFullDto {
     private String annotation;
     private CategoryDto category;
     private Long confirmedRequests;
+    private LocalDateTime createdOn;
+    private String description;
     private LocalDateTime eventDate;
     private Long id;
     private UserShortDto initiator;
+    private LocationDto location;
     private Boolean paid;
-    private String title;
     private Integer participantLimit;
+    private LocalDateTime publishedOn;
+    private Boolean requestModeration;
+    private String state;
+    private String title;
     private Long views;
 }

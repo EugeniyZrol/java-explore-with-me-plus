@@ -37,7 +37,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationMapper.toEntity(request);
 
         if (request.getEvents() != null && !request.getEvents().isEmpty()) {
-            Set<Event> events = new HashSet<>(eventRepository.findAllById(request.getEvents()));
+            Set<Event> events = new HashSet<>(eventRepository.findAllByIds(request.getEvents()));
             compilation.setEvents(events);
         }
 
@@ -63,7 +63,7 @@ public class CompilationServiceImpl implements CompilationService {
         compilationMapper.updateEntityFromDto(request, compilation);
 
         if (request.getEvents() != null) {
-            Set<Event> events = new HashSet<>(eventRepository.findAllById(request.getEvents()));
+            Set<Event> events = new HashSet<>(eventRepository.findAllByIds(request.getEvents()));
             compilation.setEvents(events);
         }
 
