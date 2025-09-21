@@ -1,6 +1,6 @@
 package ewm.event.mapper;
 
-import ewm.category.model.Category;
+import ewm.categories.model.Category;
 import ewm.event.dto.*;
 import ewm.event.model.Event;
 import org.mapstruct.*;
@@ -22,21 +22,21 @@ public interface EventMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "publishedAt",  ignore = true)
     @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToPGpoint")
-    @Mapping(target = "paid", source = "isPaid")
+    @Mapping(target = "isPaid", source = "paid")
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     Event toEvent(NewEventDto newEventDto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "categoryIdToCategory")
     @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToPGpoint")
-    @Mapping(target = "paid", source = "isPaid")
+    @Mapping(target = "isPaid", source = "paid")
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     Event toEvent(UpdateEventUserRequest updateEventUserRequest);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "categoryIdToCategory")
     @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToPGpoint")
-    @Mapping(target = "paid", source = "isPaid")
+    @Mapping(target = "isPaid", source = "paid")
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     Event toEvent(UpdateEventAdminRequest updateEventAdminRequest);
 
@@ -63,15 +63,18 @@ public interface EventMapper {
         if (categoryId == null) {
             return null;
         }
-        return Category.builder().id(categoryId).build();
+        return new Category(categoryId, null);
     }
 
     @Named("locationDtoToPGpoint")
-    default PGpoint toPGpoint(LocationDto location) {
-        if (location == null) {
+    default PGpoint toPGpoint(LocationDto locationDto) {
+        if (locationDto == null) {
             return null;
         }
-        return new PGpoint(location.getLon(), location.getLat());
+        return new PGpoint(
+                locationDto.getLon(),
+                locationDto.getLat()
+        );
     }
 
     @Named("PGpointToLocationDto")
@@ -79,6 +82,9 @@ public interface EventMapper {
         if (pgpoint == null) {
             return null;
         }
-        return new LocationDto((float) pgpoint.y, (float) pgpoint.x);
+        return new LocationDto(
+                (float) pgpoint.y,
+                (float) pgpoint.x
+        );
     }
 }

@@ -2,8 +2,10 @@ package ewm.event.model;
 
 import ewm.categories.model.Category;
 import ewm.user.model.User;
+import ewm.util.PgPointType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 import org.postgresql.geometric.PGpoint;
 
 import java.time.LocalDateTime;
@@ -44,7 +46,8 @@ public class Event {
     @Column(name = "published_on")
     private LocalDateTime publishedAt;
 
-    @Column(columnDefinition = "point", nullable = false)
+    @Column(columnDefinition = "point")
+    @Type(PgPointType.class)
     private PGpoint location;
 
     @Column(name = "paid")

@@ -91,7 +91,7 @@ class CompilationServiceImplTest {
         // Arrange
         when(compilationRepository.existsByTitle("Test Compilation")).thenReturn(false);
         when(compilationMapper.toEntity(newCompilationRequest)).thenReturn(compilation);
-        when(eventRepository.findAllByIds(Set.of(1L))).thenReturn(List.of(event));
+        when(eventRepository.findAllById(Set.of(1L))).thenReturn(List.of(event));
         when(compilationRepository.save(compilation)).thenReturn(compilation);
         when(compilationMapper.toDto(compilation)).thenReturn(compilationResponse);
 
@@ -106,7 +106,7 @@ class CompilationServiceImplTest {
 
         verify(compilationRepository).existsByTitle("Test Compilation");
         verify(compilationMapper).toEntity(newCompilationRequest);
-        verify(eventRepository).findAllByIds(Set.of(1L));
+        verify(eventRepository).findAllById(Set.of(1L));
         verify(compilationRepository).save(compilation);
         verify(compilationMapper).toDto(compilation);
     }
@@ -206,7 +206,7 @@ class CompilationServiceImplTest {
         assertNotNull(result);
         assertEquals("Test Compilation", result.getTitle());
         assertNull(result.getEvents());
-        verify(eventRepository, never()).findAllByIds(anySet());
+        verify(eventRepository, never()).findAllById(anySet());
     }
 
     @Test
@@ -239,7 +239,7 @@ class CompilationServiceImplTest {
         assertNotNull(result);
         assertEquals("Test Compilation", result.getTitle());
         assertTrue(result.getEvents().isEmpty());
-        verify(eventRepository, never()).findAllByIds(anySet());
+        verify(eventRepository, never()).findAllById(anySet());
     }
 
     @Test
@@ -254,7 +254,7 @@ class CompilationServiceImplTest {
         assertEquals("Компиляция с названием уже существует: Test Compilation", exception.getMessage());
         verify(compilationRepository).existsByTitle("Test Compilation");
         verify(compilationMapper, never()).toEntity(any());
-        verify(eventRepository, never()).findAllByIds(anySet());
+        verify(eventRepository, never()).findAllById(anySet());
         verify(compilationRepository, never()).save(any());
     }
 
@@ -291,7 +291,7 @@ class CompilationServiceImplTest {
         // Arrange
         when(compilationRepository.findById(1L)).thenReturn(Optional.of(compilation));
         doNothing().when(compilationMapper).updateEntityFromDto(updateCompilationRequest, compilation);
-        when(eventRepository.findAllByIds(Set.of(1L))).thenReturn(List.of(event));
+        when(eventRepository.findAllById(Set.of(1L))).thenReturn(List.of(event));
         when(compilationRepository.save(compilation)).thenReturn(compilation);
         when(compilationMapper.toDto(compilation)).thenReturn(compilationResponse);
 
@@ -302,7 +302,7 @@ class CompilationServiceImplTest {
         assertNotNull(result);
         verify(compilationRepository).findById(1L);
         verify(compilationMapper).updateEntityFromDto(updateCompilationRequest, compilation);
-        verify(eventRepository).findAllByIds(Set.of(1L));
+        verify(eventRepository).findAllById(Set.of(1L));
         verify(compilationRepository).save(compilation);
         verify(compilationMapper).toDto(compilation);
     }
@@ -326,7 +326,7 @@ class CompilationServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        verify(eventRepository, never()).findAllByIds(anySet());
+        verify(eventRepository, never()).findAllById(anySet());
     }
 
     @Test
@@ -340,7 +340,7 @@ class CompilationServiceImplTest {
 
         when(compilationRepository.findById(1L)).thenReturn(Optional.of(compilation));
         doNothing().when(compilationMapper).updateEntityFromDto(requestWithEmptyEvents, compilation);
-        when(eventRepository.findAllByIds(Collections.emptySet())).thenReturn(Collections.emptyList());
+        when(eventRepository.findAllById(Collections.emptySet())).thenReturn(Collections.emptyList());
         when(compilationRepository.save(compilation)).thenReturn(compilation);
         when(compilationMapper.toDto(compilation)).thenReturn(compilationResponse);
 
@@ -349,7 +349,7 @@ class CompilationServiceImplTest {
 
         // Assert
         assertNotNull(result);
-        verify(eventRepository).findAllByIds(Collections.emptySet());
+        verify(eventRepository).findAllById(Collections.emptySet());
     }
 
     @Test
@@ -364,7 +364,7 @@ class CompilationServiceImplTest {
         assertEquals("Компиляция с идентификатором не найдена: 999", exception.getMessage());
         verify(compilationRepository).findById(999L);
         verify(compilationMapper, never()).updateEntityFromDto(any(), any());
-        verify(eventRepository, never()).findAllByIds(anySet());
+        verify(eventRepository, never()).findAllById(anySet());
         verify(compilationRepository, never()).save(any());
     }
 

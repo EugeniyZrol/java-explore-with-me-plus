@@ -13,7 +13,7 @@ public interface EventService {
 
     EventFullDto createEvent(Long userId, NewEventDto newEventDto);
 
-    EventFullDto getEvent(Long userId, Long eventId);
+    EventFullDto getEvent(Long userId, Long eventId, String ip);
 
     EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request);
 }

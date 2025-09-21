@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     @NonNull
-    List<Event> findAllByIds(@NonNull Iterable<Long> ids);
+    List<Event> findAllById(@NonNull Iterable<Long> ids);
 
 
     @Query("""

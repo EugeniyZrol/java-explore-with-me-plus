@@ -1,5 +1,6 @@
 package ewm.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import ewm.event.model.StateAction;
 import ewm.util.validation.ValidEnum;
 import jakarta.validation.constraints.Future;
@@ -25,6 +26,7 @@ public class UpdateEventAdminRequest {
     private String description;
 
     @Future //TODO дата начала изменяемого события должна быть не ранее чем за час от даты публикации. (Ожидается код ошибки 409)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     private LocationDto location;
@@ -35,8 +37,11 @@ public class UpdateEventAdminRequest {
 
     private Boolean requestModeration;
 
-    @ValidEnum(enumClass = StateAction.class, message = "Недопустимое значение. Необходимо указать одно из значений:" +
-            "PUBLISH_EVENT, REJECT_EVENT")
+    @ValidEnum(
+            enumClass = StateAction.class,
+            values = { "PUBLISH_EVENT", "REJECT_EVENT" },
+            message = "Недопустимое значение. Допустимые: {accepted}"
+    )
     private String stateAction;
 
     @Size(min = 3, max = 120)
@@ -64,6 +69,10 @@ public class UpdateEventAdminRequest {
 
     public boolean isPaidEmpty() {
         return paid == null;
+    }
+
+    public boolean isParticipantLimitEmpty() {
+        return participantLimit == null || participantLimit == 0;
     }
 
     public boolean isRequestModerationEmpty() {

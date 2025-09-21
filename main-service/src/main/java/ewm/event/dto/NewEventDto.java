@@ -1,5 +1,6 @@
 package ewm.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import ewm.util.validation.ValidEventDate;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,7 @@ public class NewEventDto {
 
     @NotNull
     @ValidEventDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     @NotNull

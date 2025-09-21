@@ -1,5 +1,6 @@
 package ewm.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import ewm.event.model.StateAction;
 import ewm.util.validation.ValidEnum;
 import ewm.util.validation.ValidEventDate;
@@ -25,6 +26,7 @@ public class UpdateEventUserRequest {
     private String description;
 
     @ValidEventDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     private LocationDto location;
@@ -35,8 +37,11 @@ public class UpdateEventUserRequest {
 
     private Boolean requestModeration;
 
-    @ValidEnum(enumClass = StateAction.class, message = "Недопустимое значение. Необходимо указать одно из значений:" +
-            "SEND_TO_REVIEW, CANCEL_REVIEW")
+    @ValidEnum(
+            enumClass = StateAction.class,
+            values = { "SEND_TO_REVIEW", "CANCEL_REVIEW" },
+            message = "Недопустимое значение. Допустимые: {accepted}"
+    )
     private String stateAction;
 
     @Size(min = 3, max = 120)
@@ -64,6 +69,10 @@ public class UpdateEventUserRequest {
 
     public boolean isPaidEmpty() {
         return paid == null;
+    }
+
+    public boolean isParticipantLimitEmpty() {
+        return  participantLimit == null || participantLimit == 0;
     }
 
     public boolean isRequestModerationEmpty() {

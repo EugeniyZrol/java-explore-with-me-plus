@@ -9,11 +9,14 @@ import ewm.request.dto.EventRequestStatusUpdateRequest;
 import ewm.request.dto.EventRequestStatusUpdateResult;
 import ewm.request.dto.ParticipationRequestDto;
 import ewm.request.service.RequestService;
+import ewm.util.IpAddressHelper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +24,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Validated
 public class PrivateController {
     private final EventService eventService;
     private final RequestService requestService;
+    private final IpAddressHelper ipAddressHelper;
 
     @GetMapping("/{userId}/events")
     public List<EventShortDto> getEvents(@PathVariable("userId") Long userId,
@@ -36,20 +41,22 @@ public class PrivateController {
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable("userId") Long userId,
-                                    @RequestBody @Valid NewEventDto newEventDto) {
+                                    @Valid @RequestBody NewEventDto newEventDto) {
         return eventService.createEvent(userId, newEventDto);
     }
 
     @GetMapping("/{userId}/events/{eventId}")
     public EventFullDto getEvent(@PathVariable("userId") Long userId,
-                                 @PathVariable("eventId") Long eventId) {
-        return eventService.getEvent(userId, eventId);
+                                 @PathVariable("eventId") Long eventId,
+                                 HttpServletRequest request) {
+        String ip = ipAddressHelper.getClientIp(request);
+        return eventService.getEvent(userId, eventId, ip);
     }
 
     @PatchMapping("/{userId}/events/{eventId}")
     public EventFullDto updateEvent(@PathVariable("userId") Long userId,
                                     @PathVariable("eventId") Long eventId,
-                                    @RequestBody @Valid UpdateEventUserRequest request) {
+                                    @Valid @RequestBody UpdateEventUserRequest request) {
         return eventService.updateEvent(userId, eventId, request);
     }
 
@@ -71,7 +78,7 @@ public class PrivateController {
         return requestService.getRequestsByUser(userId);
     }
 
-    @PostMapping("/{userId}/requests")
+    @PostMapping("/{userId}/events/{eventId}/requests")
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createRequest(@PathVariable("userId") Long userId,
                                                  @PathVariable("eventId") Long eventId) {
