@@ -22,6 +22,7 @@ public class Compilation {
     private String title;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean pinned = false;
 
     @ManyToMany
