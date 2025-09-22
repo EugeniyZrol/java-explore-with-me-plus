@@ -35,9 +35,7 @@ public class StatsClient {
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, Optional<List<String>> uris, Boolean unique) {
         return restClient.get()
                 .uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/stats");
-
-                    builder
+                    UriBuilder builder = uriBuilder.path("/stats")
                             .queryParam("start", start.toString())
                             .queryParam("end", end.toString())
                             .queryParam("unique", unique);
@@ -48,6 +46,7 @@ public class StatsClient {
                     return builder.build();
                 })
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<ViewStatsDto>>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 }

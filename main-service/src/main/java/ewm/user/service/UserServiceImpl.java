@@ -1,5 +1,6 @@
 package ewm.user.service;
 
+import ewm.user.dto.UserShortDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,12 +18,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     @Override
-    @Transactional
     public UserResponse createUser(NewUserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new ConflictException("User with email already exists: " + userRequest.getEmail());
@@ -43,11 +44,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
+    public UserShortDto getUserById(Long userId) {
+        checkUserExists(userId);
+        return userMapper.toShortDto(userRepository.findById(userId).get());
+    }
+
+    @Override
     public void deleteUser(Long userId) {
+        checkUserExists(userId);
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void checkUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User not found with id: " + userId);
         }
-        userRepository.deleteById(userId);
     }
 }

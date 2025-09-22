@@ -8,11 +8,11 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CompilationService {
-    CompilationResponse createCompilation (NewCompilationRequest request);
+    CompilationResponse createCompilation(NewCompilationRequest request);
 
-    void deleteCompilation (Long compId);
+    void deleteCompilation(Long compId);
 
-    CompilationResponse updateCompilation (Long compId, UpdateCompilationRequest request);
+    CompilationResponse updateCompilation(Long compId, UpdateCompilationRequest request);
 
     List<CompilationResponse> getCompilations(Boolean pinned, Pageable pageable);
 
