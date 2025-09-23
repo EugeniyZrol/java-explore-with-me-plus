@@ -17,7 +17,7 @@ public class ParticipationRequestController {
     private final ParticipationRequestService requestService;
 
     @GetMapping
-    public List<ParticipationRequestDto> getUserRequest (@PathVariable Long userId){
+    public List<ParticipationRequestDto> getUserRequest(@PathVariable Long userId) {
         log.info("GET/users/{}/requests", userId);
         return requestService.getUserRequests(userId);
     }
@@ -35,6 +35,6 @@ public class ParticipationRequestController {
             @PathVariable Long userId,
             @PathVariable Long requestId) {
         log.info("PATCH /users/{}/requests/{}/cancel", userId, requestId);
-        return requestService.cancelRequest (userId, requestId);
+        return requestService.cancelRequest(userId, requestId);
     }
 }
