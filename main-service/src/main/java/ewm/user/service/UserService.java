@@ -3,6 +3,7 @@ package ewm.user.service;
 import ewm.user.dto.NewUserRequest;
 import ewm.user.dto.UserResponse;
 import ewm.user.dto.UserShortDto;
+import ewm.user.model.User;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface UserService {
     void deleteUser(Long userId);
 
     void checkUserExists(Long userId);
+
+    User getUserEntityById(Long userId);
 }

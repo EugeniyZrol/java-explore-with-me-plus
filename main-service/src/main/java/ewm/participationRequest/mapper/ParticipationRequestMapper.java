@@ -4,14 +4,13 @@ import ewm.participationRequest.dto.ParticipationRequestDto;
 import ewm.participationRequest.model.ParticipationRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface ParticipationRequestMapper {
 
     @Mapping(source = "event.id", target = "event")
     @Mapping(source = "requester.id", target = "requester")
-    @Mapping(source = "status.name", target = "status")
+    @Mapping(source = "status", target = "status")
     ParticipationRequestDto toDto(ParticipationRequest request);
 
     @Mapping(target = "id", ignore = true)

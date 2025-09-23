@@ -32,9 +32,11 @@ public class Event {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "initiator_id")
     private User initiator;
 
     @Column(name = "created_on", nullable = false)
@@ -61,4 +63,16 @@ public class Event {
 
     @Column(nullable = false, length = 20)
     private String state;
+
+    public Boolean getRequestModeration() {
+        return isRequestModeration;
+    }
+
+    public Boolean getPaid() {
+        return isPaid;
+    }
+
+    public Boolean isModerationRequired() {
+        return Boolean.TRUE.equals(isRequestModeration) && participantLimit != 0;
+    }
 }

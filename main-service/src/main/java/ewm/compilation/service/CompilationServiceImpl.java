@@ -38,7 +38,13 @@ public class CompilationServiceImpl implements CompilationService {
 
         if (request.getEvents() != null && !request.getEvents().isEmpty()) {
             Set<Event> events = new HashSet<>(eventRepository.findAllById(request.getEvents()));
+
+            if (events.size() != request.getEvents().size()) {
+                throw new NotFoundException("Некоторые события не найдены");
+            }
             compilation.setEvents(events);
+        } else {
+            compilation.setEvents(new HashSet<>());
         }
 
         Compilation savedCompilation = compilationRepository.save(compilation);
@@ -60,15 +66,33 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Компиляция с идентификатором не найдена: " + compId));
 
-        compilationMapper.updateEntityFromDto(request, compilation);
-
-        if (request.getEvents() != null) {
-            Set<Event> events = new HashSet<>(eventRepository.findAllById(request.getEvents()));
-            compilation.setEvents(events);
+        if (request.getTitle() != null &&
+                !request.getTitle().equals(compilation.getTitle()) &&
+                compilationRepository.existsByTitle(request.getTitle())) {
+            throw new ConflictException("Компиляция с названием уже существует: " + request.getTitle());
         }
 
-        Compilation updateCompilation = compilationRepository.save(compilation);
-        return compilationMapper.toDto(updateCompilation);
+        if (request.getTitle() != null) {
+            compilation.setTitle(request.getTitle());
+        }
+        if (request.getPinned() != null) {
+            compilation.setPinned(request.getPinned());
+        }
+
+        if (request.getEvents() != null) {
+            if (request.getEvents().isEmpty()) {
+                compilation.setEvents(new HashSet<>());
+            } else {
+                Set<Event> events = new HashSet<>(eventRepository.findAllById(request.getEvents()));
+                if (events.size() != request.getEvents().size()) {
+                    throw new NotFoundException("Некоторые события не найдены");
+                }
+                compilation.setEvents(events);
+            }
+        }
+
+        Compilation updatedCompilation = compilationRepository.save(compilation);
+        return compilationMapper.toDto(updatedCompilation);
     }
 
     @Override

@@ -1,18 +1,16 @@
-package ewm.request.dto;
+package ewm.participationRequest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParticipationRequestDto {
-    private String created;
-    private Long event;
-    private Long id;
-    private Long requester;
+public class EventRequestStatusUpdateRequest {
+    private List<Long> requestIds;
     private String status;
 }
