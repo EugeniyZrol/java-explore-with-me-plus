@@ -29,7 +29,6 @@ public class ParticipationRequest {
 
     private LocalDateTime created;
 
-    @ManyToOne
-    @JoinColumn(name = "status_id")
+    @Enumerated(EnumType.STRING)
     private RequestStatus status;
 }

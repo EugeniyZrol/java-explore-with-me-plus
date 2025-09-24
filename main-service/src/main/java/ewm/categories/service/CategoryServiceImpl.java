@@ -43,9 +43,11 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(catId)) {
             throw new NotFoundException("Категория с ID=" + catId + " не найдена.");
         }
-        /*if (eventRepository.existsByCategoryId(catId)) { //любой метод который проверяет наличие категории в событии
+
+        if (eventRepository.existsByCategoryId(catId)) {
             throw new ConflictException("Нельзя удалить категорию, с которой связаны события.");
-        }*/
+        }
+
         categoryRepository.deleteById(catId);
     }
 

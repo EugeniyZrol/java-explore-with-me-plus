@@ -1,14 +1,14 @@
-package ewm.controller;
+package ewm.event.controller;
 
 import ewm.event.dto.EventFullDto;
 import ewm.event.dto.EventShortDto;
 import ewm.event.dto.NewEventDto;
 import ewm.event.dto.UpdateEventUserRequest;
 import ewm.event.service.EventService;
-import ewm.request.dto.EventRequestStatusUpdateRequest;
-import ewm.request.dto.EventRequestStatusUpdateResult;
-import ewm.request.dto.ParticipationRequestDto;
-import ewm.request.service.RequestService;
+import ewm.participationRequest.service.ParticipationRequestService;
+import ewm.participationRequest.dto.EventRequestStatusUpdateRequest;
+import ewm.participationRequest.dto.EventRequestStatusUpdateResult;
+import ewm.participationRequest.dto.ParticipationRequestDto;
 import ewm.util.IpAddressHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,9 +25,9 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Validated
-public class PrivateController {
+public class PrivateEventController {
     private final EventService eventService;
-    private final RequestService requestService;
+    private final ParticipationRequestService requestService;
     private final IpAddressHelper ipAddressHelper;
 
     @GetMapping("/{userId}/events")
@@ -71,23 +71,5 @@ public class PrivateController {
                                                               @PathVariable("eventId") Long eventId,
                                                               @RequestBody EventRequestStatusUpdateRequest request) {
         return requestService.changeRequestStatus(userId, eventId, request);
-    }
-
-    @GetMapping("/{userId}/requests")
-    public List<ParticipationRequestDto> getRequestsByUser(@PathVariable("userId") Long userId) {
-        return requestService.getRequestsByUser(userId);
-    }
-
-    @PostMapping("/{userId}/events/{eventId}/requests")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto createRequest(@PathVariable("userId") Long userId,
-                                                 @PathVariable("eventId") Long eventId) {
-        return requestService.createRequest(userId, eventId);
-    }
-
-    @PatchMapping("/{userId}/requests/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable("userId") Long userId,
-                                                 @PathVariable("requestId") Long requestId) {
-        return requestService.cancelRequest(userId, requestId);
     }
 }
