@@ -1,4 +1,4 @@
-package ewm.event.admin.dto;
+package ewm.event.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

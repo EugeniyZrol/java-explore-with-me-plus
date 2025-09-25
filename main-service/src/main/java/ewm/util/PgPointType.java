@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
-// Без этого класса не удается работать с типом point в PostgreSQL средствами JPA
 public class PgPointType implements UserType<PGpoint> {
 
     @Override

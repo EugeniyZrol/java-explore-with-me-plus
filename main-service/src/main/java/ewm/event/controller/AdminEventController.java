@@ -1,9 +1,9 @@
-package ewm.event.admin.controller;
+package ewm.event.controller;
 
-import ewm.event.admin.dto.AdminEventSearchRequest;
+import ewm.event.dto.AdminEventSearchRequest;
 import ewm.event.dto.EventFullDto;
 import ewm.event.dto.UpdateEventAdminRequest;
-import ewm.event.admin.service.AdminEventService;
+import ewm.event.service.AdminEventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

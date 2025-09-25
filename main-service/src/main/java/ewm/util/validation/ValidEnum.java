@@ -1,7 +1,6 @@
 package ewm.util.validation;
 
 import jakarta.validation.Constraint;
-import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
@@ -15,10 +14,6 @@ public @interface ValidEnum {
     String[] values() default {};
 
     String message() default "Недопустимое значение. Допустимо указать: {accepted}";
-
-    Class<?>[] groups() default {};
-
-    Class<? extends Payload>[] payload() default {};
 
     boolean ignoreCase() default true;
 }

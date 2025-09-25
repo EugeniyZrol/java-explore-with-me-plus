@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,21 +33,26 @@ public class StatsClient {
                 .retrieve();
     }
 
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, Optional<List<String>> uris, Boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
+                                       Optional<List<String>> uris, Boolean unique) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         return restClient.get()
                 .uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/stats")
-                            .queryParam("start", start.toString())
-                            .queryParam("end", end.toString())
+                    var builder = uriBuilder.path("/stats")
+                            .queryParam("start", start.format(formatter))
+                            .queryParam("end", end.format(formatter))
                             .queryParam("unique", unique);
 
-                    uris.ifPresent(list ->
-                            list.forEach(uri -> builder.queryParam("uris", uri)));
+                    uris.ifPresent(uriList -> {
+                        if (uriList != null && !uriList.isEmpty()) {
+                            uriList.forEach(uri -> builder.queryParam("uris", uri));
+                        }
+                    });
 
                     return builder.build();
                 })
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+                .body(new ParameterizedTypeReference<>() {});
     }
 }

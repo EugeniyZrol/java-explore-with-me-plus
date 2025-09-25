@@ -34,13 +34,18 @@ public class NewEventDto {
     @NotNull
     private LocationDto location;
 
-    private Boolean paid;
+    @Builder.Default
+    private Boolean paid = false;
 
-    private Integer participantLimit;
+    @Min(0)
+    @Builder.Default
+    private Integer participantLimit = 0;
 
-    private Boolean requestModeration;
+    @Builder.Default
+    private Boolean requestModeration = true;
 
     @NotBlank
     @Size(min = 3, max = 120)
     private String title;
+
 }

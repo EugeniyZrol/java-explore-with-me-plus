@@ -1,4 +1,4 @@
-package ewm.event.admin.service;
+package ewm.event.service;
 
 import ewm.event.dto.EventFullDto;
 import ewm.event.dto.UpdateEventAdminRequest;
