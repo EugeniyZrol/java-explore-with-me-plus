@@ -34,7 +34,7 @@ services:
     build: ./stats/stats-server
     container_name: ewm_stats_service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats
+      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:6541/stats
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
     ports:
@@ -47,7 +47,7 @@ services:
     build: ./main-service
     container_name: ewm-main-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://main-db:5432/main
+      SPRING_DATASOURCE_URL: jdbc:postgresql://main-db:6542/main
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
     ports:
