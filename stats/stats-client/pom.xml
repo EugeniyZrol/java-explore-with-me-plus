@@ -14,6 +14,7 @@
     <name>stats-client</name>
     <description>Stats Client module</description>
 
+
     <dependencies>
         <dependency>
             <groupId>ru.practicum</groupId>

@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j  // Добавьте эту аннотацию
+@Slf4j
 public class StatsService {
 
     private final StatsRepository statsRepository;
