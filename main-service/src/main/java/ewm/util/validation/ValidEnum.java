@@ -1,19 +1,18 @@
 package ewm.util.validation;
 
 import jakarta.validation.Constraint;
-
+import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
-@Documented
 @Constraint(validatedBy = EnumValidator.class)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidEnum {
+    String message() default "Invalid enum value";
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
+
     Class<? extends Enum<?>> enumClass();
-
     String[] values() default {};
-
-    String message() default "Недопустимое значение. Допустимо указать: {accepted}";
-
-    boolean ignoreCase() default true;
+    boolean ignoreCase() default false;
 }

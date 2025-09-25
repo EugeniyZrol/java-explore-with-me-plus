@@ -6,7 +6,6 @@ import ewm.categories.model.Category;
 
 public final class CategoryMapper {
     private CategoryMapper() {
-
     }
 
     public static Category toCategory(NewCategoryDto newCategoryDto) {

@@ -33,8 +33,14 @@ public class EventStatsService {
         return (stats != null && !stats.isEmpty()) ? stats.getFirst().getHits() : 0L;
     }
 
-    public void recordHit(String uri, String ip) {
-        statsClient.hit(new EndpointHitDto(APP_NAME, uri, ip, LocalDateTime.now()));
+    public void recordHit(String path, String ip) {
+        EndpointHitDto hitDto = new EndpointHitDto(
+                "ewm-main-service",
+                path,
+                ip,
+                LocalDateTime.now()
+        );
+        statsClient.hit(hitDto);
     }
 
     public Long getConfirmedRequests(Long eventId) {

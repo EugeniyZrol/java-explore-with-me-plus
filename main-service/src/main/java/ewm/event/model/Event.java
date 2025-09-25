@@ -54,15 +54,15 @@ public class Event {
 
     @Column(name = "paid", nullable = false)
     @Builder.Default
-    private Boolean isPaid = false; // значение по умолчанию
+    private Boolean isPaid = false;
 
     @Column(name = "participant_limit", nullable = false)
     @Builder.Default
-    private Integer participantLimit = 0; // значение по умолчанию
+    private Integer participantLimit = 0;
 
     @Column(name = "request_moderation", nullable = false)
     @Builder.Default
-    private Boolean isRequestModeration = true; // значение по умолчанию
+    private Boolean isRequestModeration = true;
 
     @Column(nullable = false, length = 20)
     private String state;

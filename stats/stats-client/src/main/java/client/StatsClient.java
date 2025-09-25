@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,33 +26,41 @@ public class StatsClient {
     }
 
     public void hit(EndpointHitDto endpointHitDto) {
-        restClient.post()
-                .uri("/hit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(endpointHitDto)
-                .retrieve();
+        try {
+            restClient.post()
+                    .uri("/hit")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(endpointHitDto)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            System.err.println("Ошибка при отправке статистики: " + e.getMessage());
+        }
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
                                        Optional<List<String>> uris, Boolean unique) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        return restClient.get()
-                .uri(uriBuilder -> {
-                    var builder = uriBuilder.path("/stats")
-                            .queryParam("start", start.format(formatter))
-                            .queryParam("end", end.format(formatter))
-                            .queryParam("unique", unique);
+        try {
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath("/stats")
+                    .queryParam("start", start.format(formatter))
+                    .queryParam("end", end.format(formatter))
+                    .queryParam("unique", unique);
 
-                    uris.ifPresent(uriList -> {
-                        if (uriList != null && !uriList.isEmpty()) {
-                            uriList.forEach(uri -> builder.queryParam("uris", uri));
-                        }
-                    });
+            uris.ifPresent(uriList -> {
+                if (uriList != null && !uriList.isEmpty()) {
+                    uriList.forEach(uri -> uriBuilder.queryParam("uris", uri));
+                }
+            });
 
-                    return builder.build();
-                })
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+            return restClient.get()
+                    .uri(uriBuilder.build().toUriString())
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+        } catch (Exception e) {
+            System.err.println("Ошибка при получении статистики: " + e.getMessage());
+            return List.of();
+        }
     }
 }

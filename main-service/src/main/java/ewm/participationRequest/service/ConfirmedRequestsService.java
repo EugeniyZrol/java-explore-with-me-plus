@@ -15,12 +15,4 @@ public class ConfirmedRequestsService {
         Long count = requestRepository.countConfirmedRequests(eventId);
         return count != null ? count : 0L;
     }
-
-    public Map<Long, Long> getConfirmedCount(Collection<? extends Long> eventIds) {
-        Map<Long, Long> map = new HashMap<>();
-        for (Long id : eventIds) {
-            map.put(id, getConfirmedRequestsCount(id));
-        }
-        return map;
-    }
 }
