@@ -19,7 +19,7 @@ public class StatsClient {
     final RestClient restClient;
 
     public StatsClient(RestClient.Builder restClientBuilder,
-                       @Value("${stats.server.url:http://localhost:9090}") String serverUrl) {
+                       @Value("${stats.server.url:http://stats-server:9090}") String serverUrl) {
         this.restClient = restClientBuilder
                 .baseUrl(serverUrl)
                 .build();
