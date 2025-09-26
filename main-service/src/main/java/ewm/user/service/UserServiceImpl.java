@@ -2,6 +2,7 @@ package ewm.user.service;
 
 import ewm.user.dto.UserShortDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserResponse> getUsers(List<Long> ids, Pageable pageable) {
-        return userRepository.findUsersByIds(ids, pageable)
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "id")
+        );
+
+        return userRepository.findUsersByIds(ids, sortedPageable)
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());

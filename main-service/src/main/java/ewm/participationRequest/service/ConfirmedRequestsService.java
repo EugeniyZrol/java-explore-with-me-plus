@@ -4,6 +4,8 @@ import ewm.participationRequest.repository.ParticipationRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 @Service
 @RequiredArgsConstructor
 public class ConfirmedRequestsService {

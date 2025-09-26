@@ -28,9 +28,9 @@ public interface EventMapper {
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     Event toEvent(NewEventDto newEventDto);
 
-    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "category", source = "category", qualifiedByName = "categoryToDto")
+    @Mapping(target = "initiator", source = "initiator", qualifiedByName = "userToShortDto")
     @Mapping(target = "confirmedRequests", ignore = true)
-    @Mapping(target = "initiator",  ignore = true)
     @Mapping(target = "paid", source = "isPaid")
     @Mapping(target = "views", ignore = true)
     EventShortDto toShortDto(Event event);

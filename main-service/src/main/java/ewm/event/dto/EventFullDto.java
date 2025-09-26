@@ -26,12 +26,21 @@ public class EventFullDto {
     private Long id;
     private UserShortDto initiator;
     private LocationDto location;
-    private Boolean paid;
-    private Integer participantLimit;
+
+    @Builder.Default
+    private Boolean paid = false;
+
+    @Builder.Default
+    private Integer participantLimit = 0;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishedOn;
-    private Boolean requestModeration;
+
+    @Builder.Default
+    private Boolean requestModeration = true;
+
     private String state;
     private String title;
     private Long views;
+
 }

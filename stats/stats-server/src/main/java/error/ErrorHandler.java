@@ -20,6 +20,19 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ErrorHandler {
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleIllegalArgumentException(final IllegalArgumentException e) {
+        log.error("Validation error: {}", e.getMessage(), e);
+        return new ApiError(
+                List.of(e.getMessage()),
+                "Incorrectly made request.",
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+    }
+
     @ExceptionHandler(DataAccessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleDataAccessException(final DataAccessException e) {
@@ -84,8 +97,7 @@ public class ErrorHandler {
 
     @ExceptionHandler({
             MissingServletRequestParameterException.class,
-            MethodArgumentTypeMismatchException.class,
-            IllegalArgumentException.class
+            MethodArgumentTypeMismatchException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequestException(final Exception e) {

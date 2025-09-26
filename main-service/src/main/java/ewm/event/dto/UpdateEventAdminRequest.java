@@ -25,7 +25,7 @@ public class UpdateEventAdminRequest {
     @Size(min = 20, max = 7000)
     private String description;
 
-    @Future //TODO дата начала изменяемого события должна быть не ранее чем за час от даты публикации. (Ожидается код ошибки 409)
+    @Future
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
@@ -46,44 +46,4 @@ public class UpdateEventAdminRequest {
 
     @Size(min = 3, max = 120)
     private String title;
-
-    public boolean isAnnotationEmpty() {
-        return annotation == null;
-    }
-
-    public boolean isCategoryEmpty() {
-        return category == null || category == 0;
-    }
-
-    public boolean isDescriptionEmpty() {
-        return description == null;
-    }
-
-    public boolean isEventDateEmpty() {
-        return eventDate == null;
-    }
-
-    public boolean isLocationEmpty() {
-        return location == null;
-    }
-
-    public boolean isPaidEmpty() {
-        return paid == null;
-    }
-
-    public boolean isParticipantLimitEmpty() {
-        return participantLimit == null || participantLimit == 0;
-    }
-
-    public boolean isRequestModerationEmpty() {
-        return requestModeration == null;
-    }
-
-    public boolean isStateActionEmpty() {
-        return stateAction == null;
-    }
-
-    public boolean isTitleEmpty() {
-        return title == null;
-    }
 }

@@ -7,9 +7,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,35 +19,48 @@ public class StatsClient {
     final RestClient restClient;
 
     public StatsClient(RestClient.Builder restClientBuilder,
-                       @Value("${stats.server.url:http://localhost:9090}") String serverUrl) {
+                       @Value("${stats.server.url:http://stats-server:9090}") String serverUrl) {
         this.restClient = restClientBuilder
                 .baseUrl(serverUrl)
                 .build();
     }
 
     public void hit(EndpointHitDto endpointHitDto) {
-        restClient.post()
-                .uri("/hit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(endpointHitDto)
-                .retrieve();
+        try {
+            restClient.post()
+                    .uri("/hit")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(endpointHitDto)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            System.err.println("Ошибка при отправке статистики: " + e.getMessage());
+        }
     }
 
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, Optional<List<String>> uris, Boolean unique) {
-        return restClient.get()
-                .uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/stats")
-                            .queryParam("start", start.toString())
-                            .queryParam("end", end.toString())
-                            .queryParam("unique", unique);
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
+                                       Optional<List<String>> uris, Boolean unique) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-                    uris.ifPresent(list ->
-                            list.forEach(uri -> builder.queryParam("uris", uri)));
+        try {
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath("/stats")
+                    .queryParam("start", start.format(formatter))
+                    .queryParam("end", end.format(formatter))
+                    .queryParam("unique", unique);
 
-                    return builder.build();
-                })
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+            uris.ifPresent(uriList -> {
+                if (uriList != null && !uriList.isEmpty()) {
+                    uriList.forEach(uri -> uriBuilder.queryParam("uris", uri));
+                }
+            });
+
+            return restClient.get()
+                    .uri(uriBuilder.build().toUriString())
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+        } catch (Exception e) {
+            System.err.println("Ошибка при получении статистики: " + e.getMessage());
+            return List.of();
+        }
     }
 }

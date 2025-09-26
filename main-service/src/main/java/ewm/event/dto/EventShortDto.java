@@ -22,7 +22,10 @@ public class EventShortDto {
     private LocalDateTime eventDate;
     private Long id;
     private UserShortDto initiator;
-    private Boolean paid;
+
+    @Builder.Default
+    private Boolean paid = false;
+
     private String title;
     private Long views;
 }

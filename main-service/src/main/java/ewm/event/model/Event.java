@@ -52,27 +52,31 @@ public class Event {
     @Type(PgPointType.class)
     private PGpoint location;
 
-    @Column(name = "paid")
-    private Boolean isPaid;
+    @Column(name = "paid", nullable = false)
+    @Builder.Default
+    private Boolean isPaid = false;
 
-    @Column(name = "participant_limit")
-    private Integer participantLimit;
+    @Column(name = "participant_limit", nullable = false)
+    @Builder.Default
+    private Integer participantLimit = 0;
 
-    @Column(name = "request_moderation")
-    private Boolean isRequestModeration;
+    @Column(name = "request_moderation", nullable = false)
+    @Builder.Default
+    private Boolean isRequestModeration = true;
 
     @Column(nullable = false, length = 20)
     private String state;
 
     public Boolean getRequestModeration() {
-        return isRequestModeration;
+        return isRequestModeration != null ? isRequestModeration : true;
     }
 
     public Boolean getPaid() {
-        return isPaid;
+        return isPaid != null ? isPaid : false;
     }
 
-    public Boolean isModerationRequired() {
-        return Boolean.TRUE.equals(isRequestModeration) && participantLimit != 0;
+
+    public Integer getParticipantLimit() {
+        return participantLimit != null ? participantLimit : 0;
     }
 }
