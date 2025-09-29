@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -146,13 +147,35 @@ public class CompilationServiceImpl implements CompilationService {
         Page<Compilation> compilationsPage;
 
         if (pinned != null) {
-            compilationsPage = compilationRepository.findCompilationsWithEvents(pinned, sortedPageable);
+            compilationsPage = compilationRepository.findByPinned(pinned, sortedPageable);
         } else {
-            compilationsPage = compilationRepository.findCompilationsWithEvents(null, sortedPageable);
+            compilationsPage = compilationRepository.findAll(sortedPageable);
         }
 
-        return compilationsPage.getContent()
-                .stream()
+        List<Compilation> compilations = compilationsPage.getContent();
+
+        if (!compilations.isEmpty()) {
+            List<Long> compilationIds = compilations.stream()
+                    .map(Compilation::getId)
+                    .collect(Collectors.toList());
+
+            List<Compilation> compilationsWithEvents = compilationRepository.findAllByIdWithEvents(compilationIds);
+            Map<Long, Compilation> compilationMap = compilationsWithEvents.stream()
+                    .collect(Collectors.toMap(Compilation::getId, c -> c));
+
+            return compilations.stream()
+                    .map(compilation -> {
+                        Compilation compilationWithEvents = compilationMap.get(compilation.getId());
+                        if (compilationWithEvents != null) {
+                            compilation.setEvents(compilationWithEvents.getEvents());
+                        }
+                        return compilation;
+                    })
+                    .map(compilationMapper::toDto)
+                    .collect(Collectors.toList());
+        }
+
+        return compilations.stream()
                 .map(compilationMapper::toDto)
                 .collect(Collectors.toList());
     }
