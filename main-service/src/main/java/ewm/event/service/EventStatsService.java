@@ -5,6 +5,7 @@ import ewm.event.dto.EventFullDto;
 import ewm.event.dto.EventShortDto;
 import ewm.event.mapper.EventMapper;
 import ewm.event.model.Event;
+import ewm.event.repository.EventRepository;
 import ewm.participationRequest.dto.EventConfirmedRequestsDto;
 import ewm.participationRequest.repository.ParticipationRequestRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,27 +27,24 @@ public class EventStatsService {
 
     private final StatsClient statsClient;
     private final ParticipationRequestRepository requestRepository;
+    private final EventRepository eventRepository;
 
-    public Map<Long, Long> getViewsForEventsBatch(List<Event> events) {
-        if (events.isEmpty()) {
+    public Map<Long, Long> getViewsForEventsBatch(List<Long> eventIds) {
+        if (eventIds.isEmpty()) {
             return Map.of();
         }
 
-        List<String> uris = events.stream()
-                .map(event -> ENDPOINT + "/" + event.getId())
+        List<String> uris = eventIds.stream()
+                .map(id -> ENDPOINT + "/" + id)
                 .collect(Collectors.toList());
 
-        LocalDateTime start = events.stream()
-                .map(Event::getCreatedAt)
-                .min(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now());
-
+        LocalDateTime start = eventRepository.findFirstByOrderByCreatedAtAsc().getCreatedAt();
         LocalDateTime end = LocalDateTime.now();
 
         List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
 
-        Map<Long, Long> viewsMap = events.stream()
-                .collect(Collectors.toMap(Event::getId, id -> 0L));
+        Map<Long, Long> viewsMap = eventIds.stream()
+                .collect(Collectors.toMap(id -> id, id -> 0L));
 
         if (stats != null) {
             stats.forEach(stat -> {
@@ -89,7 +87,7 @@ public class EventStatsService {
     public EventFullDto enrichEventFullDto(Event event, EventMapper eventMapper) {
         EventFullDto dto = eventMapper.toFullDto(event);
         Map<Long, Long> confirmedRequests = getConfirmedRequestsBatch(List.of(event.getId()));
-        Map<Long, Long> views = getViewsForEventsBatch(List.of(event));
+        Map<Long, Long> views = getViewsForEventsBatch(List.of(event.getId()));
 
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
         dto.setViews(views.getOrDefault(event.getId(), 0L));
@@ -99,7 +97,7 @@ public class EventStatsService {
     public EventShortDto enrichEventShortDto(Event event, EventMapper eventMapper) {
         EventShortDto dto = eventMapper.toShortDto(event);
         Map<Long, Long> confirmedRequests = getConfirmedRequestsBatch(List.of(event.getId()));
-        Map<Long, Long> views = getViewsForEventsBatch(List.of(event));
+        Map<Long, Long> views = getViewsForEventsBatch(List.of(event.getId()));
 
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
         dto.setViews(views.getOrDefault(event.getId(), 0L));
@@ -124,11 +122,34 @@ public class EventStatsService {
                 .collect(Collectors.toList());
 
         Map<Long, Long> confirmedRequestsMap = getConfirmedRequestsBatch(eventIds);
-        Map<Long, Long> viewsMap = getViewsForEventsBatch(events);
+        Map<Long, Long> viewsMap = getViewsForEventsBatch(eventIds);
 
         return events.stream()
                 .map(event -> {
                     EventFullDto dto = eventMapper.toFullDto(event);
+                    dto.setConfirmedRequests(confirmedRequestsMap.getOrDefault(event.getId(), 0L));
+                    dto.setViews(viewsMap.getOrDefault(event.getId(), 0L));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    public List<EventShortDto> enrichEventsShortDtoBatch(List<Event> events, EventMapper eventMapper) {
+        if (events.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Long> confirmedRequestsMap = getConfirmedRequestsBatch(eventIds);
+        Map<Long, Long> viewsMap = getViewsForEventsBatch(eventIds);
+
+        return events.stream()
+                .map(event -> {
+                    EventShortDto dto = eventMapper.toShortDto(event);
                     dto.setConfirmedRequests(confirmedRequestsMap.getOrDefault(event.getId(), 0L));
                     dto.setViews(viewsMap.getOrDefault(event.getId(), 0L));
                     return dto;

@@ -26,14 +26,7 @@ public class AdminEventController {
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        return adminEventService.getEvents(
-                request.getUsers(),
-                request.getStates(),
-                request.getCategories(),
-                request.getRangeStart(),
-                request.getRangeEnd(),
-                pageRequest
-        );
+        return adminEventService.getEvents(request, pageRequest);
     }
 
     @PatchMapping("/{eventId}")

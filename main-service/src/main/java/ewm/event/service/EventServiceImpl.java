@@ -40,11 +40,9 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, Pageable pageable) {
         userService.getUserById(userId);
-        Page<Event> eventsPage = eventRepository.findByInitiatorIdOrderByCreatedAtDesc(userId, pageable);
+        Page<Event> eventsPage = eventRepository.findAllByInitiatorIdOrderByCreatedAtDesc(userId, pageable);
 
-        return eventsPage.getContent().stream()
-                .map(event -> eventStatsService.enrichEventShortDto(event, eventMapper))
-                .collect(Collectors.toList());
+        return eventStatsService.enrichEventsShortDtoBatch(eventsPage.getContent(), eventMapper);
     }
 
     @Override
@@ -98,22 +96,16 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid,
-                                               LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                               Boolean onlyAvailable, String sort, Integer from, Integer size, String ip) {
+    public List<EventShortDto> getPublicEvents(PublicEventSearchRequest requestParams, Pageable pageable) {
 
-        EventValidationUtils.validateDateRange(rangeStart, rangeEnd);
-        eventStatsService.recordHit(ENDPOINT, ip);
+        EventValidationUtils.validateDateRange(requestParams.getRangeStart(), requestParams.getRangeEnd());
 
-        Specification<Event> spec = buildPublicEventsSpecification(text, categories, paid, rangeStart, rangeEnd, onlyAvailable);
-        Pageable pageable = createPageable(from, size, sort);
+        Specification<Event> spec = buildPublicEventsSpecification(requestParams);
 
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
-        List<EventShortDto> result = events.stream()
-                .map(event -> eventStatsService.enrichEventShortDto(event, eventMapper))
-                .collect(Collectors.toList());
+        List<EventShortDto> result = eventStatsService.enrichEventsShortDtoBatch(events, eventMapper);
 
-        return sortEvents(result, sort);
+        return sortEvents(result, requestParams.getSort());
     }
 
     @Override
@@ -127,35 +119,33 @@ public class EventServiceImpl implements EventService {
         return eventStatsService.enrichEventFullDto(event, eventMapper);
     }
 
-    private Specification<Event> buildPublicEventsSpecification(String text, List<Long> categories,
-                                                                Boolean paid, LocalDateTime rangeStart,
-                                                                LocalDateTime rangeEnd, Boolean onlyAvailable) {
+    private Specification<Event> buildPublicEventsSpecification(PublicEventSearchRequest params) {
         Specification<Event> spec = Specification.where(EventSpecifications.isPublished());
 
-        if (text != null && !text.trim().isEmpty()) {
-            spec = spec.and(EventSpecifications.containsText(text));
+        if (params.getText() != null && !params.getText().trim().isEmpty()) {
+            spec = spec.and(EventSpecifications.containsText(params.getText()));
         }
 
-        if (categories != null && !categories.isEmpty()) {
-            spec = spec.and(EventSpecifications.hasCategories(categories));
+        if (params.getCategories() != null && !params.getCategories().isEmpty()) {
+            spec = spec.and(EventSpecifications.hasCategories(params.getCategories()));
         }
 
-        if (paid != null) {
-            spec = spec.and(EventSpecifications.isPaid(paid));
+        if (params.getPaid() != null) {
+            spec = spec.and(EventSpecifications.isPaid(params.getPaid()));
         }
 
-        LocalDateTime actualRangeStart = (rangeStart == null && rangeEnd == null) ?
-                LocalDateTime.now() : rangeStart;
+        LocalDateTime actualRangeStart = (params.getRangeStart() == null && params.getRangeEnd() == null) ?
+                LocalDateTime.now() : params.getRangeStart();
 
         if (actualRangeStart != null) {
             spec = spec.and(EventSpecifications.startsAfter(actualRangeStart));
         }
 
-        if (rangeEnd != null) {
-            spec = spec.and(EventSpecifications.endsBefore(rangeEnd));
+        if (params.getRangeEnd() != null) {
+            spec = spec.and(EventSpecifications.endsBefore(params.getRangeEnd()));
         }
 
-        if (Boolean.TRUE.equals(onlyAvailable)) {
+        if (Boolean.TRUE.equals(params.getOnlyAvailable())) {
             spec = spec.and(EventSpecifications.hasAvailableSlots());
         }
 

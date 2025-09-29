@@ -1,12 +1,8 @@
 package ewm.event.service;
 
-import ewm.event.dto.EventFullDto;
-import ewm.event.dto.EventShortDto;
-import ewm.event.dto.NewEventDto;
-import ewm.event.dto.UpdateEventUserRequest;
+import ewm.event.dto.*;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -18,9 +14,7 @@ public interface EventService {
 
     EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request);
 
-    List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid,
-                                        LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                        Boolean onlyAvailable, String sort, Integer from, Integer size, String ip);
+    List<EventShortDto> getPublicEvents(PublicEventSearchRequest requestParams, Pageable pageable);
 
     EventFullDto getPublicEventById(Long eventId, String ip);
 }
