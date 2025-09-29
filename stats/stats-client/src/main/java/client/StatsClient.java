@@ -12,7 +12,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class StatsClient {
@@ -39,7 +38,7 @@ public class StatsClient {
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end,
-                                       Optional<List<String>> uris, Boolean unique) {
+                                       List<String> uris, Boolean unique) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         try {
@@ -48,11 +47,9 @@ public class StatsClient {
                     .queryParam("end", end.format(formatter))
                     .queryParam("unique", unique);
 
-            uris.ifPresent(uriList -> {
-                if (uriList != null && !uriList.isEmpty()) {
-                    uriList.forEach(uri -> uriBuilder.queryParam("uris", uri));
-                }
-            });
+            if (uris != null && !uris.isEmpty()) {
+                uris.forEach(uri -> uriBuilder.queryParam("uris", uri));
+            }
 
             return restClient.get()
                     .uri(uriBuilder.build().toUriString())

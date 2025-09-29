@@ -27,22 +27,26 @@ public class EventStatsService {
     private final StatsClient statsClient;
     private final ParticipationRequestRepository requestRepository;
 
-    public Map<Long, Long> getViewsForEventsBatch(List<Long> eventIds) {
-        if (eventIds.isEmpty()) {
+    public Map<Long, Long> getViewsForEventsBatch(List<Event> events) {
+        if (events.isEmpty()) {
             return Map.of();
         }
 
-        List<String> uris = eventIds.stream()
-                .map(id -> ENDPOINT + "/" + id)
+        List<String> uris = events.stream()
+                .map(event -> ENDPOINT + "/" + event.getId())
                 .collect(Collectors.toList());
 
-        LocalDateTime start = LocalDateTime.now().minusYears(10);
-        LocalDateTime end = LocalDateTime.now().plusYears(10);
+        LocalDateTime start = events.stream()
+                .map(Event::getCreatedAt)
+                .min(LocalDateTime::compareTo)
+                .orElse(LocalDateTime.now());
 
-        List<ViewStatsDto> stats = statsClient.getStats(start, end, Optional.of(uris), true);
+        LocalDateTime end = LocalDateTime.now();
 
-        Map<Long, Long> viewsMap = eventIds.stream()
-                .collect(Collectors.toMap(id -> id, id -> 0L));
+        List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
+
+        Map<Long, Long> viewsMap = events.stream()
+                .collect(Collectors.toMap(Event::getId, id -> 0L));
 
         if (stats != null) {
             stats.forEach(stat -> {
@@ -85,7 +89,7 @@ public class EventStatsService {
     public EventFullDto enrichEventFullDto(Event event, EventMapper eventMapper) {
         EventFullDto dto = eventMapper.toFullDto(event);
         Map<Long, Long> confirmedRequests = getConfirmedRequestsBatch(List.of(event.getId()));
-        Map<Long, Long> views = getViewsForEventsBatch(List.of(event.getId()));
+        Map<Long, Long> views = getViewsForEventsBatch(List.of(event));
 
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
         dto.setViews(views.getOrDefault(event.getId(), 0L));
@@ -95,7 +99,7 @@ public class EventStatsService {
     public EventShortDto enrichEventShortDto(Event event, EventMapper eventMapper) {
         EventShortDto dto = eventMapper.toShortDto(event);
         Map<Long, Long> confirmedRequests = getConfirmedRequestsBatch(List.of(event.getId()));
-        Map<Long, Long> views = getViewsForEventsBatch(List.of(event.getId()));
+        Map<Long, Long> views = getViewsForEventsBatch(List.of(event));
 
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
         dto.setViews(views.getOrDefault(event.getId(), 0L));
@@ -120,7 +124,7 @@ public class EventStatsService {
                 .collect(Collectors.toList());
 
         Map<Long, Long> confirmedRequestsMap = getConfirmedRequestsBatch(eventIds);
-        Map<Long, Long> viewsMap = getViewsForEventsBatch(eventIds);
+        Map<Long, Long> viewsMap = getViewsForEventsBatch(events);
 
         return events.stream()
                 .map(event -> {

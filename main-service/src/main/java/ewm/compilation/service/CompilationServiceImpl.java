@@ -164,12 +164,11 @@ public class CompilationServiceImpl implements CompilationService {
                     .collect(Collectors.toMap(Compilation::getId, c -> c));
 
             return compilations.stream()
-                    .map(compilation -> {
+                    .peek(compilation -> {
                         Compilation compilationWithEvents = compilationMap.get(compilation.getId());
                         if (compilationWithEvents != null) {
                             compilation.setEvents(compilationWithEvents.getEvents());
                         }
-                        return compilation;
                     })
                     .map(compilationMapper::toDto)
                     .collect(Collectors.toList());

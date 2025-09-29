@@ -40,7 +40,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, Pageable pageable) {
         userService.getUserById(userId);
-        Page<Event> eventsPage = eventRepository.findAllByInitiatorId(userId, pageable);
+        Page<Event> eventsPage = eventRepository.findByInitiatorIdOrderByCreatedAtDesc(userId, pageable);
 
         return eventsPage.getContent().stream()
                 .map(event -> eventStatsService.enrichEventShortDto(event, eventMapper))
