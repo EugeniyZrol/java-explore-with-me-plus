@@ -96,7 +96,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getPublicEvents(PublicEventSearchRequest requestParams, Pageable pageable) {
+    public List<EventShortDto> getPublicEvents(PublicEventSearchRequest requestParams, Pageable pageable, String ip) {
 
         EventValidationUtils.validateDateRange(requestParams.getRangeStart(), requestParams.getRangeEnd());
 
@@ -104,6 +104,8 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findAll(spec, pageable).getContent();
         List<EventShortDto> result = eventStatsService.enrichEventsShortDtoBatch(events, eventMapper);
+
+        eventStatsService.recordHit(ENDPOINT, ip);
 
         return sortEvents(result, requestParams.getSort());
     }

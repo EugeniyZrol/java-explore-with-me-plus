@@ -21,14 +21,15 @@ public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping
-    public List<EventShortDto> getEvents(@ModelAttribute @Valid PublicEventSearchRequest requestParams) {
+    public ResponseEntity<List<EventShortDto>> getEvents(@ModelAttribute @Valid PublicEventSearchRequest requestParams,
+                                         HttpServletRequest request) {
         int size = requestParams.getSize() != null ? Math.max(1, requestParams.getSize()) : 10;
         int from = requestParams.getFrom() != null ? requestParams.getFrom() : 0;
         int page = from / size;
 
         PageRequest pageRequest = PageRequest.of(page, size);
-
-        return eventService.getPublicEvents(requestParams, pageRequest);
+        List<EventShortDto> events = eventService.getPublicEvents(requestParams, pageRequest, request.getRemoteAddr());
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")
