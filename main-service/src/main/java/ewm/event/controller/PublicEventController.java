@@ -7,6 +7,7 @@ import ewm.event.service.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,15 +21,14 @@ public class PublicEventController {
     private final EventService eventService;
 
     @GetMapping
-    public ResponseEntity<List<EventShortDto>> getEvents(@ModelAttribute @Valid PublicEventSearchRequest requestParams,
-                                                         HttpServletRequest request) {
+    public List<EventShortDto> getEvents(@ModelAttribute @Valid PublicEventSearchRequest requestParams) {
+        int size = requestParams.getSize() != null ? Math.max(1, requestParams.getSize()) : 10;
+        int from = requestParams.getFrom() != null ? requestParams.getFrom() : 0;
+        int page = from / size;
 
-        List<EventShortDto> events = eventService.getPublicEvents(
-                requestParams,
-                request.getRemoteAddr()
-        );
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-        return ResponseEntity.ok(events);
+        return eventService.getPublicEvents(requestParams, pageRequest);
     }
 
     @GetMapping("/{id}")

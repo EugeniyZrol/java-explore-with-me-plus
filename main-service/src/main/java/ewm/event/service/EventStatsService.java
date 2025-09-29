@@ -41,7 +41,7 @@ public class EventStatsService {
         LocalDateTime start = eventRepository.findFirstByOrderByCreatedAtAsc().getCreatedAt();
         LocalDateTime end = LocalDateTime.now();
 
-        List<ViewStatsDto> stats = statsClient.getStats(start, end, Optional.of(uris), true);
+        List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
 
         Map<Long, Long> viewsMap = eventIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> 0L));

@@ -14,7 +14,7 @@ public interface EventService {
 
     EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request);
 
-    List<EventShortDto> getPublicEvents(PublicEventSearchRequest requestParams, String ip);
+    List<EventShortDto> getPublicEvents(PublicEventSearchRequest requestParams, Pageable pageable);
 
     EventFullDto getPublicEventById(Long eventId, String ip);
 }
