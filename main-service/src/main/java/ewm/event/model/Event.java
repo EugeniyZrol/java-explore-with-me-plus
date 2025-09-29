@@ -2,11 +2,8 @@ package ewm.event.model;
 
 import ewm.categories.model.Category;
 import ewm.user.model.User;
-import ewm.util.PgPointType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
-import org.postgresql.geometric.PGpoint;
 
 import java.time.LocalDateTime;
 
@@ -48,9 +45,15 @@ public class Event {
     @Column(name = "published_on")
     private LocalDateTime publishedAt;
 
-    @Column(columnDefinition = "point")
-    @Type(PgPointType.class)
-    private PGpoint location;
+    //Сделал Embedded согласно замечанию. Однако мне не понятно, почему некорректно PGpoint использовать?
+    // тип point как раз для работы с координатами, ранее использованное решение полностью работоспособно
+    // просьба пояснить, почему именно это решение является верным
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "latitude", column = @Column(name = "latitude")),
+            @AttributeOverride(name = "longitude", column = @Column(name = "longitude"))
+    })
+    private EventLocation location;
 
     @Column(name = "paid", nullable = false)
     @Builder.Default

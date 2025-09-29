@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "id")
         );
 
-        return userRepository.findUsersByIds(ids, sortedPageable)
+        return userRepository.findByIdIn(ids, sortedPageable)
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());

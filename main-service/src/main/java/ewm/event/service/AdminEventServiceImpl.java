@@ -1,5 +1,6 @@
 package ewm.event.service;
 
+import ewm.event.dto.AdminEventSearchRequest;
 import ewm.event.dto.EventFullDto;
 import ewm.event.dto.UpdateEventAdminRequest;
 import ewm.event.mapper.EventMapper;
@@ -33,16 +34,12 @@ public class AdminEventServiceImpl implements AdminEventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventFullDto> getEvents(List<Long> users,
-                                        List<String> states,
-                                        List<Long> categories,
-                                        LocalDateTime rangeStart,
-                                        LocalDateTime rangeEnd,
+    public List<EventFullDto> getEvents(AdminEventSearchRequest requestParams,
                                         Pageable pageable) {
 
-        EventValidationUtils.validateDateRange(rangeStart, rangeEnd);
+        EventValidationUtils.validateDateRange(requestParams.getRangeStart(), requestParams.getRangeEnd());
 
-        Specification<Event> specification = buildSpecification(users, states, categories, rangeStart, rangeEnd);
+        Specification<Event> specification = buildAdminEventsSpecification(requestParams);
 
         Page<Long> eventIdsPage = eventRepository.findAll(specification, pageable)
                 .map(Event::getId);
@@ -59,32 +56,30 @@ public class AdminEventServiceImpl implements AdminEventService {
         return eventStatsService.enrichEventsFullDtoBatch(events, eventMapper);
     }
 
-    private Specification<Event> buildSpecification(List<Long> users, List<String> states,
-                                                    List<Long> categories, LocalDateTime rangeStart,
-                                                    LocalDateTime rangeEnd) {
+    private Specification<Event> buildAdminEventsSpecification(AdminEventSearchRequest params) {
         Specification<Event> spec = Specification.where(null);
 
-        if (users != null && !users.isEmpty()) {
-            spec = spec.and(EventSpecifications.hasUsers(users));
+        if (params.getUsers() != null && !params.getUsers().isEmpty()) {
+            spec = spec.and(EventSpecifications.hasUsers(params.getUsers()));
         }
 
-        if (states != null && !states.isEmpty()) {
-            spec = spec.and(EventSpecifications.hasStates(states));
+        if (params.getStates() != null && !params.getStates().isEmpty()) {
+            spec = spec.and(EventSpecifications.hasStates(params.getStates()));
         }
 
-        if (categories != null && !categories.isEmpty()) {
-            spec = spec.and(EventSpecifications.hasCategories(categories));
+        if (params.getCategories() != null && !params.getCategories().isEmpty()) {
+            spec = spec.and(EventSpecifications.hasCategories(params.getCategories()));
         }
 
-        if (rangeStart != null) {
-            spec = spec.and(EventSpecifications.startsAfter(rangeStart));
+        if (params.getRangeStart() != null) {
+            spec = spec.and(EventSpecifications.startsAfter(params.getRangeStart()));
         }
 
-        if (rangeEnd != null) {
-            spec = spec.and(EventSpecifications.endsBefore(rangeEnd));
+        if (params.getRangeEnd() != null) {
+            spec = spec.and(EventSpecifications.endsBefore(params.getRangeEnd()));
         }
 
-        if (rangeStart == null && rangeEnd == null) {
+        if (params.getRangeStart() == null && params.getRangeEnd() == null) {
             spec = spec.and(EventSpecifications.startsAfter(LocalDateTime.now()));
         }
 

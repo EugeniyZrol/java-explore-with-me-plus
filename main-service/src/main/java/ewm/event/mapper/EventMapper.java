@@ -4,11 +4,11 @@ import ewm.categories.dto.CategoryDto;
 import ewm.categories.model.Category;
 import ewm.event.dto.*;
 import ewm.event.model.Event;
+import ewm.event.model.EventLocation;
 import ewm.user.dto.UserShortDto;
 import ewm.user.model.User;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
-import org.postgresql.geometric.PGpoint;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -23,7 +23,7 @@ public interface EventMapper {
     @Mapping(target = "initiator", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "publishedAt",  ignore = true)
-    @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToPGpoint")
+    @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToEventLocation")
     @Mapping(target = "isPaid", source = "paid")
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     Event toEvent(NewEventDto newEventDto);
@@ -46,7 +46,7 @@ public interface EventMapper {
     @Mapping(target = "publishedOn", source = "publishedAt")
     @Mapping(target = "paid", source = "isPaid")
     @Mapping(target = "requestModeration", source = "isRequestModeration")
-    @Mapping(target = "location", source = "location", qualifiedByName = "PGpointToLocationDto")
+    @Mapping(target = "location", source = "location", qualifiedByName = "eventLocationToLocationDto")
     @Mapping(target = "category", source = "category", qualifiedByName = "categoryToDto")
     @Mapping(target = "initiator", source = "initiator", qualifiedByName = "userToShortDto")
     @Mapping(target = "confirmedRequests", ignore = true)
@@ -56,7 +56,7 @@ public interface EventMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "categoryIdToCategory")
-    @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToPGpoint")
+    @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToEventLocation")
     @Mapping(target = "isPaid", source = "paid")
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     @Mapping(target = "state", ignore = true)
@@ -65,7 +65,7 @@ public interface EventMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "categoryIdToCategory")
-    @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToPGpoint")
+    @Mapping(target = "location", source = "location", qualifiedByName = "locationDtoToEventLocation")
     @Mapping(target = "isPaid", source = "paid")
     @Mapping(target = "isRequestModeration", source = "requestModeration")
     @Mapping(target = "state", ignore = true)
@@ -101,25 +101,25 @@ public interface EventMapper {
         return userShortDto;
     }
 
-    @Named("locationDtoToPGpoint")
-    default PGpoint toPGpoint(LocationDto locationDto) {
+    @Named("locationDtoToEventLocation")
+    default EventLocation toEventLocation(LocationDto locationDto) {
         if (locationDto == null) {
             return null;
         }
-        return new PGpoint(
-                locationDto.getLon(),
-                locationDto.getLat()
+        return new EventLocation(
+                locationDto.getLat(),
+                locationDto.getLon()
         );
     }
 
-    @Named("PGpointToLocationDto")
-    default LocationDto toLocationDto(PGpoint pgpoint) {
-        if (pgpoint == null) {
+    @Named("eventLocationToLocationDto")
+    default LocationDto toLocationDto(EventLocation eventLocation) {
+        if (eventLocation == null) {
             return null;
         }
         return new LocationDto(
-                (float) pgpoint.y,
-                (float) pgpoint.x
+                eventLocation.getLatitude(),
+                eventLocation.getLongitude()
         );
     }
 }

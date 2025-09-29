@@ -1,19 +1,14 @@
 package ewm.event.service;
 
+import ewm.event.dto.AdminEventSearchRequest;
 import ewm.event.dto.EventFullDto;
 import ewm.event.dto.UpdateEventAdminRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AdminEventService {
-    List<EventFullDto> getEvents(List<Long> users,
-                                 List<String> states,
-                                 List<Long> categories,
-                                 LocalDateTime rangeStart,
-                                 LocalDateTime rangeEnd,
-                                 Pageable pageable);
+    List<EventFullDto> getEvents(AdminEventSearchRequest requestParams, Pageable pageable);
 
     EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest request);
 }
