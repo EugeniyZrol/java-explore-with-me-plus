@@ -73,4 +73,22 @@ public class EventSpecifications {
                         )
                 );
     }
+
+    public static Specification<Event> hasUsers(List<Long> userIds) {
+        return (root, query, criteriaBuilder) -> {
+            if (userIds == null || userIds.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("initiator").get("id").in(userIds);
+        };
+    }
+
+    public static Specification<Event> hasStates(List<String> states) {
+        return (root, query, criteriaBuilder) -> {
+            if (states == null || states.isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("state").in(states);
+        };
+    }
 }

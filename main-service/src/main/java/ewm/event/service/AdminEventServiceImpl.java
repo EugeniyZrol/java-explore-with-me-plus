@@ -7,10 +7,13 @@ import ewm.event.model.Event;
 import ewm.event.model.EventState;
 import ewm.event.model.StateAction;
 import ewm.event.repository.EventRepository;
+import ewm.event.repository.specification.EventSpecifications;
 import ewm.util.validation.EventValidationUtils;
 import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,10 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminEventServiceImpl implements AdminEventService {
 
     private final EventRepository eventRepository;
@@ -40,62 +43,69 @@ public class AdminEventServiceImpl implements AdminEventService {
         EventValidationUtils.validateDateRange(rangeStart, rangeEnd);
 
         Specification<Event> specification = buildSpecification(users, states, categories, rangeStart, rangeEnd);
-        List<Event> events = eventRepository.findAll(specification, pageable).getContent();
 
-        return events.stream()
-                .map(event -> eventStatsService.enrichEventFullDto(event, eventMapper))
-                .collect(Collectors.toList());
-    }
+        Page<Long> eventIdsPage = eventRepository.findAll(specification, pageable)
+                .map(Event::getId);
+        List<Long> eventIds = eventIdsPage.getContent();
 
-    @Override
-    @Transactional
-    public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest request) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found"));
+        if (eventIds.isEmpty()) {
+            return List.of();
+        }
 
-        validateAndUpdateEventState(event, request);
-        eventMapper.updateEventFromAdminRequest(request, event);
+        List<Event> events = eventRepository.findAllByIdWithCategoryAndInitiator(eventIds);
 
-        Event updatedEvent = eventRepository.save(event);
-        return eventStatsService.enrichEventFullDto(updatedEvent, eventMapper);
+        log.debug("Админский поиск событий: найдено {} событий", events.size());
+
+        return eventStatsService.enrichEventsFullDtoBatch(events, eventMapper);
     }
 
     private Specification<Event> buildSpecification(List<Long> users, List<String> states,
                                                     List<Long> categories, LocalDateTime rangeStart,
                                                     LocalDateTime rangeEnd) {
-        Specification<Event> specification = Specification.where(null);
+        Specification<Event> spec = Specification.where(null);
 
         if (users != null && !users.isEmpty()) {
-            specification = specification.and((root, query, cb) ->
-                    root.get("initiator").get("id").in(users));
+            spec = spec.and(EventSpecifications.hasUsers(users));
         }
 
         if (states != null && !states.isEmpty()) {
-            specification = specification.and((root, query, cb) ->
-                    root.get("state").in(states));
+            spec = spec.and(EventSpecifications.hasStates(states));
         }
 
         if (categories != null && !categories.isEmpty()) {
-            specification = specification.and((root, query, cb) ->
-                    root.get("category").get("id").in(categories));
+            spec = spec.and(EventSpecifications.hasCategories(categories));
         }
 
         if (rangeStart != null) {
-            specification = specification.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
+            spec = spec.and(EventSpecifications.startsAfter(rangeStart));
         }
 
         if (rangeEnd != null) {
-            specification = specification.and((root, query, cb) ->
-                    cb.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
+            spec = spec.and(EventSpecifications.endsBefore(rangeEnd));
         }
 
         if (rangeStart == null && rangeEnd == null) {
-            specification = specification.and((root, query, cb) ->
-                    cb.greaterThan(root.get("eventDate"), LocalDateTime.now()));
+            spec = spec.and(EventSpecifications.startsAfter(LocalDateTime.now()));
         }
 
-        return specification;
+        return spec;
+    }
+
+    @Override
+    @Transactional
+    public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest request) {
+        Event event = eventRepository.findByIdWithCategoryAndInitiator(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с ID=" + eventId + " не найдено"));
+
+        log.debug("Обновление события администратором: ID={}, stateAction={}", eventId, request.getStateAction());
+
+        validateAndUpdateEventState(event, request);
+        eventMapper.updateEventFromAdminRequest(request, event);
+
+        Event updatedEvent = eventRepository.save(event);
+        log.info("Событие обновлено администратором: ID={}, новое состояние={}", eventId, updatedEvent.getState());
+
+        return eventStatsService.enrichEventFullDto(updatedEvent, eventMapper);
     }
 
     private void validateAndUpdateEventState(Event event, UpdateEventAdminRequest request) {
@@ -107,15 +117,19 @@ public class AdminEventServiceImpl implements AdminEventService {
                 validatePublishEvent(event, currentState);
                 event.setState(EventState.PUBLISHED.toString());
                 event.setPublishedAt(LocalDateTime.now());
+                log.debug("Событие опубликовано: ID={}", event.getId());
             } else if (stateAction == StateAction.REJECT_EVENT) {
                 validateRejectEvent(currentState);
                 event.setState(EventState.CANCELED.toString());
+                log.debug("Событие отклонено: ID={}", event.getId());
             }
         }
     }
 
     private void validatePublishEvent(Event event, EventState currentState) {
         if (currentState != EventState.PENDING) {
+            log.warn("Попытка публикации события не в состоянии ожидания: ID={}, текущее состояние={}",
+                    event.getId(), currentState);
             throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
         EventValidationUtils.validateEventDate(event.getEventDate(), 1);
@@ -123,6 +137,7 @@ public class AdminEventServiceImpl implements AdminEventService {
 
     private void validateRejectEvent(EventState currentState) {
         if (currentState == EventState.PUBLISHED) {
+            log.warn("Попытка отклонения уже опубликованного события");
             throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано");
         }
     }

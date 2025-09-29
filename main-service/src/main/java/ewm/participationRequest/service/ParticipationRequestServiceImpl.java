@@ -1,6 +1,7 @@
 package ewm.participationRequest.service;
 import ewm.event.model.Event;
 import ewm.event.repository.EventRepository;
+import ewm.event.service.EventStatsService;
 import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import ewm.participationRequest.dto.EventRequestStatusUpdateRequest;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,16 +33,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ParticipationRequestMapper requestMapper;
+    private final EventStatsService eventStatsService;
 
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
-        log.info("Получение запросов для пользователя с id: {}", userId);
-
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователь с id = " + userId + " не найден");
         }
 
-        return requestRepository.findAllByRequesterId(userId).stream()
+        return requestRepository.findAllByRequesterIdWithEventAndRequester(userId).stream()
                 .map(requestMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -50,10 +51,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         log.info("Создание запроса для пользователя с id: {} на событие с id: {}", userId, eventId);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
-
-        Event event = eventRepository.findById(eventId)
+        Event event = eventRepository.findByIdWithInitiator(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено"));
 
         if (event.getInitiator().getId().equals(userId)) {
@@ -68,7 +66,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException("Запрос на участие в этом событии уже существует");
         }
 
-        Long confirmedRequests = requestRepository.countConfirmedRequests(eventId);
+        Map<Long, Long> confirmedRequestsMap = eventStatsService.getConfirmedRequestsBatch(List.of(eventId));
+        Long confirmedRequests = confirmedRequestsMap.getOrDefault(eventId, 0L);
+
         if (event.getParticipantLimit() > 0 && confirmedRequests >= event.getParticipantLimit()) {
             throw new ConflictException("Достигнут лимит участников для этого события");
         }
@@ -80,8 +80,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             status = RequestStatus.PENDING;
         }
 
+        User userProxy = userRepository.getReferenceById(userId);
+
         ParticipationRequest request = ParticipationRequest.builder()
-                .requester(user)
+                .requester(userProxy)
                 .event(event)
                 .created(LocalDateTime.now())
                 .status(status)
@@ -95,53 +97,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     @Transactional
-    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
-        log.info("Отмена запроса с id: {} для пользователя с id: {}", requestId, userId);
-
-        ParticipationRequest request = requestRepository.findByIdAndRequesterId(requestId, userId)
-                .orElseThrow(() -> new NotFoundException("Запрос с id=" + requestId + " не найден"));
-
-        request.setStatus(RequestStatus.CANCELED); // Используем enum напрямую
-        ParticipationRequest updatedRequest = requestRepository.save(request);
-
-        log.info("Запрос с id: {} успешно отменен", requestId);
-        return requestMapper.toDto(updatedRequest);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ParticipationRequestDto> getRequestsByEvent(Long userId, Long eventId) {
-        log.info("Получение запросов на участие для события с id: {} от пользователя с id: {}", eventId, userId);
-
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id = " + userId + " не найден");
-        }
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
-
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new ConflictException("Пользователь не является инициатором события");
-        }
-
-        List<ParticipationRequest> requests = requestRepository.findAllByEventId(eventId);
-
-        return requests.stream()
-                .map(requestMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
     public EventRequestStatusUpdateResult changeRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest request) {
         log.info("Изменение статуса запросов для события с id: {} от пользователя с id: {}", eventId, userId);
 
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Пользователь с id = " + userId + " не найден");
-        }
-
-        Event event = eventRepository.findById(eventId)
+        Event event = eventRepository.findByIdWithInitiator(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
 
         if (!event.getInitiator().getId().equals(userId)) {
@@ -150,19 +110,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             throw new ConflictException("Для этого события не требуется модерация заявок");
-        }
-
-        List<ParticipationRequest> requestsToUpdate = requestRepository.findAllById(request.getRequestIds());
-
-        if (requestsToUpdate.size() != request.getRequestIds().size()) {
-            throw new NotFoundException("Некоторые запросы не найдены");
-        }
-
-        for (ParticipationRequest participationRequest : requestsToUpdate) {
-            if (!participationRequest.getEvent().getId().equals(eventId)) {
-                throw new ConflictException("Запрос с id = " + participationRequest.getId() +
-                        " не принадлежит событию с id = " + eventId);
-            }
         }
 
         RequestStatus newStatus;
@@ -176,10 +123,19 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new ConflictException("Можно установить только статусы CONFIRMED или REJECTED");
         }
 
+        List<ParticipationRequest> requestsToUpdate =
+                requestRepository.findAllByIdWithEventAndRequester(request.getRequestIds());
+
+        if (requestsToUpdate.size() != request.getRequestIds().size()) {
+            throw new NotFoundException("Некоторые запросы не найдены");
+        }
+
         List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
         List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
 
-        Long currentConfirmedCount = requestRepository.countConfirmedRequests(eventId);
+        Map<Long, Long> confirmedRequestsMap = eventStatsService.getConfirmedRequestsBatch(List.of(eventId));
+        Long currentConfirmedCount = confirmedRequestsMap.getOrDefault(eventId, 0L);
+
         int participantLimit = event.getParticipantLimit() != null ? event.getParticipantLimit() : 0;
 
         for (ParticipationRequest participationRequest : requestsToUpdate) {
@@ -187,6 +143,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 throw new ConflictException("Можно изменять только запросы в статусе PENDING. " +
                         "Запрос с id = " + participationRequest.getId() + " имеет статус: " +
                         participationRequest.getStatus());
+            }
+
+            if (!participationRequest.getEvent().getId().equals(eventId)) {
+                throw new ConflictException("Запрос с id = " + participationRequest.getId() +
+                        " не принадлежит событию с id = " + eventId);
             }
 
             if (newStatus == RequestStatus.CONFIRMED) {
@@ -200,9 +161,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 participationRequest.setStatus(RequestStatus.REJECTED);
                 rejectedRequests.add(requestMapper.toDto(participationRequest));
             }
-
-            requestRepository.save(participationRequest);
         }
+
+        requestRepository.saveAll(requestsToUpdate);
 
         log.info("Обновлено статусов: подтверждено - {}, отклонено - {}",
                 confirmedRequests.size(), rejectedRequests.size());
@@ -211,5 +172,32 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 .confirmedRequests(confirmedRequests)
                 .rejectedRequests(rejectedRequests)
                 .build();
+    }
+
+
+    @Override
+    @Transactional
+    public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
+        ParticipationRequest request = requestRepository.findByIdWithEventAndRequester(requestId, userId)
+                .orElseThrow(() -> new NotFoundException("Запрос с id=" + requestId + " не найден"));
+
+        request.setStatus(RequestStatus.CANCELED);
+        ParticipationRequest updatedRequest = requestRepository.save(request);
+
+        return requestMapper.toDto(updatedRequest);
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getRequestsByEvent(Long userId, Long eventId) {
+        Event event = eventRepository.findByIdWithInitiator(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new ConflictException("Пользователь не является инициатором события");
+        }
+
+        return requestRepository.findAllByEventIdWithEventAndRequester(eventId).stream()
+                .map(requestMapper::toDto)
+                .collect(Collectors.toList());
     }
 }
