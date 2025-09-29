@@ -29,5 +29,6 @@ public interface CompilationRepository extends JpaRepository<Compilation, Long>,
     Optional<Compilation> findByIdWithEvents(@Param("id") Long id);
 
     boolean existsByTitle(String title);
+
     boolean existsById(@NonNull Long compId);
 }
