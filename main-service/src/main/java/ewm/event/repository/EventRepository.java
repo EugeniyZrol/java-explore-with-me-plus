@@ -19,7 +19,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     boolean existsById(@NonNull Long id);
 
-    Page<Event> findByInitiatorIdOrderByCreatedAtDesc(Long initiatorId, Pageable pageable);
+    Page<Event> findAllByInitiatorIdOrderByCreatedAtDesc(Long initiatorId, Pageable pageable);
 
     Optional<Event> findByIdAndInitiatorId(Long eventId, Long initiatorId);
 
@@ -41,4 +41,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
             "LEFT JOIN FETCH e.initiator " +
             "WHERE e.id IN :eventIds")
     List<Event> findAllByIdWithCategoryAndInitiator(@Param("eventIds") List<Long> eventIds);
+
+    Event findFirstByOrderByCreatedAtAsc();
 }

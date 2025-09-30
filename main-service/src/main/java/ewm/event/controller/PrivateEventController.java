@@ -9,7 +9,6 @@ import ewm.participationRequest.service.ParticipationRequestService;
 import ewm.participationRequest.dto.EventRequestStatusUpdateRequest;
 import ewm.participationRequest.dto.EventRequestStatusUpdateResult;
 import ewm.participationRequest.dto.ParticipationRequestDto;
-import ewm.util.IpAddressHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ import java.util.List;
 public class PrivateEventController {
     private final EventService eventService;
     private final ParticipationRequestService requestService;
-    private final IpAddressHelper ipAddressHelper;
 
     @GetMapping("/{userId}/events")
     public List<EventShortDto> getEvents(@PathVariable("userId") Long userId,
@@ -49,8 +47,7 @@ public class PrivateEventController {
     public EventFullDto getEvent(@PathVariable("userId") Long userId,
                                  @PathVariable("eventId") Long eventId,
                                  HttpServletRequest request) {
-        String ip = ipAddressHelper.getClientIp(request);
-        return eventService.getEvent(userId, eventId, ip);
+        return eventService.getEvent(userId, eventId, request.getRemoteAddr());
     }
 
     @PatchMapping("/{userId}/events/{eventId}")
