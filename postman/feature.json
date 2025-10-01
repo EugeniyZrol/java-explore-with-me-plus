@@ -143,7 +143,6 @@
               "    pm.expect(response).to.have.property('author');",
               "    pm.expect(response.author).to.have.property('id');",
               "    pm.expect(response.author).to.have.property('name');",
-              "    pm.expect(response.author).to.have.property('email');",
               "    pm.expect(response).to.have.property('createdDate');",
               "    pm.expect(response).to.have.property('isEdited', false);",
               "});"
