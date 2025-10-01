@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.lang.NonNull;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface CompilationRepository extends JpaRepository<Compilation, Long>, JpaSpecificationExecutor<Compilation> {
@@ -15,8 +14,6 @@ public interface CompilationRepository extends JpaRepository<Compilation, Long>,
     Page<Compilation> findByPinned(Boolean pinned, Pageable pageable);
 
     Optional<Compilation> findById(@NonNull Long id);
-
-    boolean existsByTitle(String title);
 
     boolean existsById(@NonNull Long compId);
 }
