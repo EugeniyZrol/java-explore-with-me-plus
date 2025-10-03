@@ -11,8 +11,25 @@
 			"name": "Admin",
 			"item": [
 				{
-					"name": "Создание комментария для теста администратора",
+					"name": "Удаление комментария администратором",
 					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Статус код должен быть 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Тело ответа должно быть пустым\", function () {",
+									"    pm.response.to.have.body('');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
 						{
 							"listen": "prerequest",
 							"script": {
@@ -22,13 +39,11 @@
 									"    const rnd = new RandomUtils();",
 									"    ",
 									"    try {",
-									"        // Создаем нового пользователя и событие",
 									"        const user = await api.addUser(rnd.getUser());",
 									"        const category = await api.addCategory(rnd.getCategory());",
 									"        let event = await api.addEvent(user.id, rnd.getEvent(category.id));",
 									"        event = await api.publishEvent(event.id);",
 									"        ",
-									"        // Создаем комментарий",
 									"        const commentData = {",
 									"            text: \"Комментарий для тестирования удаления администратором\"",
 									"        };",
@@ -49,70 +64,9 @@
 									"",
 									"prepareAdminTest();"
 								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Статус код должен быть 201\", function () {",
-									"    pm.response.to.have.status(201);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"text\": \"Комментарий для админ удаления\"}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/users/{{userId}}/comments/event/{{eventId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"users",
-								"{{userId}}",
-								"comments",
-								"event",
-								"{{eventId}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Удаление комментария администратором",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Статус код должен быть 204\", function () {",
-									"    pm.response.to.have.status(204);",
-									"});",
-									"",
-									"pm.test(\"Тело ответа должно быть пустым\", function () {",
-									"    pm.response.to.have.body('');",
-									"});"
-								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -461,33 +415,37 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"const api = new API(pm);",
-									"const rnd = new RandomUtils();",
+									"const preparePublicCommentTest = async () => {",
+									"    const api = new API(pm);",
+									"    const rnd = new RandomUtils();",
 									"",
-									"try {",
-									"    const user = await api.addUser(rnd.getUser());",
-									"    const category = await api.addCategory(rnd.getCategory());",
-									"    let event = await api.addEvent(user.id, rnd.getEvent(category.id));",
-									"    event = await api.publishEvent(event.id);",
+									"    try {",
+									"        const user = await api.addUser(rnd.getUser());",
+									"        const category = await api.addCategory(rnd.getCategory());",
+									"        let event = await api.addEvent(user.id, rnd.getEvent(category.id));",
+									"        event = await api.publishEvent(event.id);",
 									"",
-									"    const commentData = {",
-									"        text: \"Комментарий для теста Public comments\"",
-									"    };",
+									"        const commentData = {",
+									"            text: \"Комментарий для теста Public comments\"",
+									"        };",
 									"",
-									"    const comment = await api.post(",
-									"        `/users/${user.id}/comments/event/${event.id}`,",
-									"        commentData,",
-									"        pm.collectionVariables.get(\"baseUrl\")",
-									"    );",
+									"        const comment = await api.post(",
+									"            `/users/${user.id}/comments/event/${event.id}`,",
+									"            commentData,",
+									"            pm.collectionVariables.get(\"baseUrl\")",
+									"        );",
 									"",
-									"    pm.collectionVariables.set(\"commentId\", comment.id);",
-									"    pm.collectionVariables.set(\"eventId\", event.id);",
-									"    pm.collectionVariables.set(\"userId\", user.id);",
-									"    console.log(\"Создан комментарий для Public comments:\", comment.id);",
+									"        pm.collectionVariables.set(\"commentId\", comment.id);",
+									"        pm.collectionVariables.set(\"eventId\", event.id);",
+									"        pm.collectionVariables.set(\"userId\", user.id);",
+									"        console.log(\"Создан комментарий для Public comments:\", comment.id);",
 									"",
-									"} catch (err) {",
-									"    console.error(\"Ошибка при подготовке теста Public comments:\", err);",
-									"}"
+									"    } catch (err) {",
+									"        console.error(\"Ошибка при подготовке теста Public comments:\", err);",
+									"    }",
+									"};",
+									"",
+									"preparePublicCommentTest();"
 								],
 								"type": "text/javascript",
 								"packages": {},
