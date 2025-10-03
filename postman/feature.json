@@ -3,146 +3,10 @@
 		"_postman_id": "b6838fc2-ef36-45d2-855e-dcd62bd1fb11",
 		"name": "Explore with me - Comments API",
 		"description": "Тесты для API системы комментариев",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43248335"
 	},
 	"item": [
-		{
-			"name": "Validation",
-			"item": [
-				{
-					"name": "Тест валидации - слишком длинный комментарий",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Создаем комментарий длиннее 2000 символов",
-									"const longText = 'a'.repeat(2001);",
-									"const invalidComment = {",
-									"    text: longText",
-									"};",
-									"",
-									"pm.request.body.update({",
-									"    mode: 'raw',",
-									"    raw: JSON.stringify(invalidComment),",
-									"    options: { raw: { language: 'json' } }",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Статус код должен быть 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"text\": \"a\".repeat(2001)}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/users/{{userId}}/comments/event/{{eventId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"users",
-								"{{userId}}",
-								"comments",
-								"event",
-								"{{eventId}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Тест валидации - пустой комментарий",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const emptyComment = {",
-									"    text: \"\"",
-									"};",
-									"",
-									"pm.request.body.update({",
-									"    mode: 'raw',",
-									"    raw: JSON.stringify(emptyComment),",
-									"    options: { raw: { language: 'json' } }",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Статус код должен быть 400\", function () {",
-									"    pm.response.to.have.status(400);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"text\": \"\"}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/users/{{userId}}/comments/event/{{eventId}}",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"users",
-								"{{userId}}",
-								"comments",
-								"event",
-								"{{eventId}}"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
 		{
 			"name": "Admin",
 			"item": [
@@ -588,7 +452,46 @@
 									"    pm.expect(response).to.have.property('isEdited', false);",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const api = new API(pm);",
+									"const rnd = new RandomUtils();",
+									"",
+									"try {",
+									"    const user = await api.addUser(rnd.getUser());",
+									"    const category = await api.addCategory(rnd.getCategory());",
+									"    let event = await api.addEvent(user.id, rnd.getEvent(category.id));",
+									"    event = await api.publishEvent(event.id);",
+									"",
+									"    const commentData = {",
+									"        text: \"Комментарий для теста Public comments\"",
+									"    };",
+									"",
+									"    const comment = await api.post(",
+									"        `/users/${user.id}/comments/event/${event.id}`,",
+									"        commentData,",
+									"        pm.collectionVariables.get(\"baseUrl\")",
+									"    );",
+									"",
+									"    pm.collectionVariables.set(\"commentId\", comment.id);",
+									"    pm.collectionVariables.set(\"eventId\", event.id);",
+									"    pm.collectionVariables.set(\"userId\", user.id);",
+									"    console.log(\"Создан комментарий для Public comments:\", comment.id);",
+									"",
+									"} catch (err) {",
+									"    console.error(\"Ошибка при подготовке теста Public comments:\", err);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -691,7 +594,40 @@
 									"    pm.expect(response.message).to.include('not found') || pm.expect(response.message).to.include('не найден');",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.collectionVariables.get('baseUrl');",
+									"const userId = pm.collectionVariables.get('userId');",
+									"const commentId = pm.collectionVariables.get('commentId');",
+									"",
+									"const deleteCommentOption = {",
+									"    url: `${baseUrl}/users/${userId}/comments/${commentId}`,",
+									"    method: 'DELETE'",
+									"};",
+									"",
+									"pm.sendRequest(deleteCommentOption, function(error, response) {",
+									"    if (error) {",
+									"        console.log('Ошибка при удалении Public comment:', error);",
+									"        return;",
+									"    }",
+									"    ",
+									"    pm.test('Коммментарий успешно удален', function() {",
+									"        pm.expect(response.code).to.be.oneOf([200, 202, 204]);",
+									"    });",
+									"    ",
+									"    console.log('Коммментарий удален. Статус:', response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
@@ -706,6 +642,143 @@
 							"path": [
 								"comments",
 								"{{commentId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Validation",
+			"item": [
+				{
+					"name": "Тест валидации - слишком длинный комментарий",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Создаем комментарий длиннее 2000 символов",
+									"const longText = 'a'.repeat(2001);",
+									"const invalidComment = {",
+									"    text: longText",
+									"};",
+									"",
+									"pm.request.body.update({",
+									"    mode: 'raw',",
+									"    raw: JSON.stringify(invalidComment),",
+									"    options: { raw: { language: 'json' } }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Статус код должен быть 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"text\": \"a\".repeat(2001)}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}/comments/event/{{eventId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}",
+								"comments",
+								"event",
+								"{{eventId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Тест валидации - пустой комментарий",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const emptyComment = {",
+									"    text: \"\"",
+									"};",
+									"",
+									"pm.request.body.update({",
+									"    mode: 'raw',",
+									"    raw: JSON.stringify(emptyComment),",
+									"    options: { raw: { language: 'json' } }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Статус код должен быть 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"text\": \"\"}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}/comments/event/{{eventId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userId}}",
+								"comments",
+								"event",
+								"{{eventId}}"
 							]
 						}
 					},
