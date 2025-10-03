@@ -11,6 +11,8 @@ import ewm.participationRequest.dto.EventRequestStatusUpdateResult;
 import ewm.participationRequest.dto.ParticipationRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +32,8 @@ public class PrivateEventController {
 
     @GetMapping("/{userId}/events")
     public List<EventShortDto> getEvents(@PathVariable("userId") Long userId,
-                                         @RequestParam(defaultValue = "0") Integer from,
-                                         @RequestParam(defaultValue = "10") Integer size) {
+                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                         @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
         return eventService.getEvents(userId, pageable);
     }

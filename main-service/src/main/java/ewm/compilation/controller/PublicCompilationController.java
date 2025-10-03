@@ -2,6 +2,7 @@ package ewm.compilation.controller;
 
 import ewm.compilation.dto.CompilationResponse;
 import ewm.compilation.service.CompilationService;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,14 +20,10 @@ public class PublicCompilationController {
     @GetMapping
     public List<CompilationResponse> getCompilations(
             @RequestParam(required = false) Boolean pinned,
-            @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+            @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
 
-        int validFrom = from < 0 ? 0 : from;
-        int validSize = size <= 0 ? 10 : size;
-
-        Pageable pageable = PageRequest.of(validFrom / validSize, validSize);
-
+        Pageable pageable = PageRequest.of(from / size, size);
         return compilationService.getCompilations(pinned, pageable);
     }
 

@@ -4,6 +4,8 @@ import ewm.user.dto.NewUserRequest;
 import ewm.user.dto.UserResponse;
 import ewm.user.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +30,8 @@ public class AdminUserController {
     @GetMapping
     public List<UserResponse> getUsers(
             @RequestParam(required = false) List<Long> ids,
-            @RequestParam(defaultValue = "0") int from,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+            @RequestParam(defaultValue = "10") @Positive int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         return userService.getUsers(ids, pageable);
     }

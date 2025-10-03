@@ -12,6 +12,7 @@ import ewm.exception.ConflictException;
 import ewm.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,17 +39,10 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationResponse createCompilation(NewCompilationRequest request) {
         log.debug("Создание новой компиляции: title={}", request.getTitle());
 
-        if (compilationRepository.existsByTitle(request.getTitle())) {
-            log.warn("Попытка создания компиляции с существующим названием: {}", request.getTitle());
-            throw new ConflictException("Компиляция с названием уже существует: " + request.getTitle());
-        }
-
         Compilation compilation = compilationMapper.toEntity(request);
 
         if (request.getEvents() != null && !request.getEvents().isEmpty()) {
-            List<Event> events = eventRepository.findAllByIdWithCategoryAndInitiator(
-                    new ArrayList<>(request.getEvents())
-            );
+            List<Event> events = eventRepository.findAllById(new ArrayList<>(request.getEvents()));
 
             if (events.size() != request.getEvents().size()) {
                 log.warn("Не все события найдены при создании компиляции: requested={}, found={}",
@@ -62,25 +55,16 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setEvents(new HashSet<>());
         }
 
-        Compilation savedCompilation = compilationRepository.save(compilation);
-        log.info("Создана новая компиляция: ID={}, title={}, событий={}",
-                savedCompilation.getId(), savedCompilation.getTitle(), savedCompilation.getEvents().size());
+        try {
+            Compilation savedCompilation = compilationRepository.save(compilation);
+            log.info("Создана новая компиляция: ID={}, title={}, событий={}",
+                    savedCompilation.getId(), savedCompilation.getTitle(), savedCompilation.getEvents().size());
 
-        return compilationMapper.toDto(savedCompilation);
-    }
-
-    @Override
-    @Transactional
-    public void deleteCompilation(Long compId) {
-        log.debug("Удаление компиляции: ID={}", compId);
-
-        if (!compilationRepository.existsById(compId)) {
-            log.warn("Попытка удаления несуществующей компиляции: ID={}", compId);
-            throw new NotFoundException("Компиляция с идентификатором не найдена: " + compId);
+            return compilationMapper.toDto(savedCompilation);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Попытка создания компиляции с существующим названием: {}", request.getTitle());
+            throw new ConflictException("Компиляция с названием уже существует: " + request.getTitle());
         }
-
-        compilationRepository.deleteById(compId);
-        log.info("Компиляция удалена: ID={}", compId);
     }
 
     @Override
@@ -89,18 +73,11 @@ public class CompilationServiceImpl implements CompilationService {
         log.debug("Обновление компиляции: ID={}, title={}, pinned={}",
                 compId, request.getTitle(), request.getPinned());
 
-        Compilation compilation = compilationRepository.findByIdWithEvents(compId)
+        Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> {
                     log.warn("Попытка обновления несуществующей компиляции: ID={}", compId);
                     return new NotFoundException("Компиляция с идентификатором не найдена: " + compId);
                 });
-
-        if (request.getTitle() != null &&
-                !request.getTitle().equals(compilation.getTitle()) &&
-                compilationRepository.existsByTitle(request.getTitle())) {
-            log.warn("Попытка обновления на существующее название: {}", request.getTitle());
-            throw new ConflictException("Компиляция с названием уже существует: " + request.getTitle());
-        }
 
         if (request.getTitle() != null) {
             compilation.setTitle(request.getTitle());
@@ -116,9 +93,7 @@ public class CompilationServiceImpl implements CompilationService {
                 compilation.setEvents(new HashSet<>());
                 log.debug("Очищены события компиляции");
             } else {
-                List<Event> events = eventRepository.findAllByIdWithCategoryAndInitiator(
-                        new ArrayList<>(request.getEvents())
-                );
+                List<Event> events = eventRepository.findAllById(new ArrayList<>(request.getEvents()));
                 if (events.size() != request.getEvents().size()) {
                     log.warn("Не все события найдены при обновлении компиляции: requested={}, found={}",
                             request.getEvents().size(), events.size());
@@ -129,11 +104,30 @@ public class CompilationServiceImpl implements CompilationService {
             }
         }
 
-        Compilation updatedCompilation = compilationRepository.save(compilation);
-        log.info("Компиляция обновлена: ID={}, title={}, событий={}",
-                compId, updatedCompilation.getTitle(), updatedCompilation.getEvents().size());
+        try {
+            Compilation updatedCompilation = compilationRepository.save(compilation);
+            log.info("Компиляция обновлена: ID={}, title={}, событий={}",
+                    compId, updatedCompilation.getTitle(), updatedCompilation.getEvents().size());
 
-        return compilationMapper.toDto(updatedCompilation);
+            return compilationMapper.toDto(updatedCompilation);
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Попытка обновления на существующее название: {}", request.getTitle());
+            throw new ConflictException("Компиляция с названием уже существует: " + request.getTitle());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteCompilation(Long compId) {
+        log.debug("Удаление компиляции: ID={}", compId);
+
+        if (!compilationRepository.existsById(compId)) {
+            log.warn("Попытка удаления несуществующей компиляции: ID={}", compId);
+            throw new NotFoundException("Компиляция с идентификатором не найдена: " + compId);
+        }
+
+        compilationRepository.deleteById(compId);
+        log.info("Компиляция удалена: ID={}", compId);
     }
 
     @Override
@@ -152,36 +146,14 @@ public class CompilationServiceImpl implements CompilationService {
             compilationsPage = compilationRepository.findAll(sortedPageable);
         }
 
-        List<Compilation> compilations = compilationsPage.getContent();
-
-        if (!compilations.isEmpty()) {
-            List<Long> compilationIds = compilations.stream()
-                    .map(Compilation::getId)
-                    .collect(Collectors.toList());
-
-            List<Compilation> compilationsWithEvents = compilationRepository.findAllByIdWithEvents(compilationIds);
-            Map<Long, Compilation> compilationMap = compilationsWithEvents.stream()
-                    .collect(Collectors.toMap(Compilation::getId, c -> c));
-
-            return compilations.stream()
-                    .peek(compilation -> {
-                        Compilation compilationWithEvents = compilationMap.get(compilation.getId());
-                        if (compilationWithEvents != null) {
-                            compilation.setEvents(compilationWithEvents.getEvents());
-                        }
-                    })
-                    .map(compilationMapper::toDto)
-                    .collect(Collectors.toList());
-        }
-
-        return compilations.stream()
+        return compilationsPage.getContent().stream()
                 .map(compilationMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CompilationResponse getCompilationById(Long compId) {
-        Compilation compilation = compilationRepository.findByIdWithEvents(compId)
+        Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Компиляция с идентификатором не найдена: " + compId));
         return compilationMapper.toDto(compilation);
     }

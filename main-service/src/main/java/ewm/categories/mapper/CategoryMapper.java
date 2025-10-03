@@ -3,16 +3,14 @@ package ewm.categories.mapper;
 import ewm.categories.dto.CategoryDto;
 import ewm.categories.dto.NewCategoryDto;
 import ewm.categories.model.Category;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public final class CategoryMapper {
-    private CategoryMapper() {
-    }
+@Mapper(componentModel = "spring")
+public interface CategoryMapper {
 
-    public static Category toCategory(NewCategoryDto newCategoryDto) {
-        return new Category(newCategoryDto.getName());
-    }
+    @Mapping(target = "id", ignore = true)
+    Category toCategory(NewCategoryDto newCategoryDto);
 
-    public static CategoryDto toCategoryDto(Category category) {
-        return new CategoryDto(category.getId(), category.getName());
-    }
+    CategoryDto toCategoryDto(Category category);
 }

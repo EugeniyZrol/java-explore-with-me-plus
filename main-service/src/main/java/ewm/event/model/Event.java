@@ -28,11 +28,11 @@ public class Event {
     @Column(nullable = false, length = 7000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
@@ -77,7 +77,6 @@ public class Event {
     public Boolean getPaid() {
         return isPaid != null ? isPaid : false;
     }
-
 
     public Integer getParticipantLimit() {
         return participantLimit != null ? participantLimit : 0;

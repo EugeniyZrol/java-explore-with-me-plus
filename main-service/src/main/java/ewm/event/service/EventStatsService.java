@@ -94,16 +94,6 @@ public class EventStatsService {
         return dto;
     }
 
-    public EventShortDto enrichEventShortDto(Event event, EventMapper eventMapper) {
-        EventShortDto dto = eventMapper.toShortDto(event);
-        Map<Long, Long> confirmedRequests = getConfirmedRequestsBatch(List.of(event.getId()));
-        Map<Long, Long> views = getViewsForEventsBatch(List.of(event.getId()));
-
-        dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0L));
-        dto.setViews(views.getOrDefault(event.getId(), 0L));
-        return dto;
-    }
-
     private Long extractEventIdFromUri(String uri) {
         try {
             return Long.parseLong(uri.substring(ENDPOINT.length() + 1));
