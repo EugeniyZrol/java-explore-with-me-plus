@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
@@ -33,11 +34,11 @@ public class CategoryServiceImpl implements CategoryService {
             throw new ConflictException("Имя категории '" + categoryName + "' уже занято.");
         }
 
-        Category category = CategoryMapper.toCategory(newCategoryDto);
+        Category category = categoryMapper.toCategory(newCategoryDto);
         Category savedCategory = categoryRepository.save(category);
         log.info("Создана новая категория: ID={}, name={}", savedCategory.getId(), savedCategory.getName());
 
-        return CategoryMapper.toCategoryDto(savedCategory);
+        return categoryMapper.toCategoryDto(savedCategory);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (newName.equals(categoryToUpdate.getName())) {
             log.debug("Имя категории не изменилось: ID={}, name={}", catId, newName);
-            return CategoryMapper.toCategoryDto(categoryToUpdate);
+            return categoryMapper.toCategoryDto(categoryToUpdate);
         }
 
         if (categoryRepository.existsByName(newName)) {
@@ -82,7 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category savedCategory = categoryRepository.save(categoryToUpdate);
         log.info("Категория обновлена: ID={}, новое имя={}", catId, newName);
 
-        return CategoryMapper.toCategoryDto(savedCategory);
+        return categoryMapper.toCategoryDto(savedCategory);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.debug("Найдено категорий: {}", categories.size());
 
         return categories.stream()
-                .map(CategoryMapper::toCategoryDto)
+                .map(categoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
     }
 
@@ -110,6 +111,6 @@ public class CategoryServiceImpl implements CategoryService {
                 });
 
         log.debug("Категория найдена: ID={}, name={}", catId, category.getName());
-        return CategoryMapper.toCategoryDto(category);
+        return categoryMapper.toCategoryDto(category);
     }
 }
